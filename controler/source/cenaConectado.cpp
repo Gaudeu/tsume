@@ -57,11 +57,18 @@ cenaConectado::cenaConectado() {
 		C2D_Color32(255, 0, 0, 255), 
 		C2D_Color32(0, 0, 0, 255))); // pause
 
+	touchpad = new WidgetDesenho(
+		10.0f, 100.0f, 0.5f,
+		300.0f, 130.0f,
+		C2D_Color32(200, 200, 0, 255),
+		C2D_Color32(255, 255, 255, 255)
+	);
 }
 
 cenaConectado::~cenaConectado() {
 	C2D_TextBufDelete(textBuf);
 	delete header;
+	delete touchpad;
 }
 
 void cenaConectado::setStatus(std::string msg) {
@@ -83,6 +90,12 @@ int cenaConectado::update(const InputPacket& packet) {
 		if (botoesC[2].foiTocado(packet.touchX, packet.touchY)) {
         // pause aqui 
         }
+
+		if(touchpad -> update(packet)){
+             // envio pela rede
+			 touchpad ->limpar();
+			return 4;
+		}
 	}
 	
 	interpolar(painelY, painelAlvo, velocidade, 0.1f);
@@ -143,6 +156,9 @@ void cenaConectado::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 
 		C2D_ViewRestore(&Matrix);
 	}
+
+    touchpad -> draw();
+
 	for (auto& btn : botoesC) 
 		{
         btn.draw();

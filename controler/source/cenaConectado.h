@@ -4,11 +4,12 @@
 #include "botao.h"
 #include <vector>
 #include "painelTopo.h"
+#include "WidgetDesenho.h"
 
 class cenaConectado : public Cena {
 private:
 	PainelTopo* header;
-
+    WidgetDesenho* touchpad;
 
 
 	C2D_TextBuf textBuf;

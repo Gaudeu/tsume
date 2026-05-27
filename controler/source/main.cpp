@@ -77,6 +77,10 @@ int main() {
 				else if (nextEstate == 3) { // Supondo que 3 volta da cenaTexto
 					cenaAtual = new cenaPrincipal();
 				}
+
+				if (nextEstate == 4){
+					nextEstate = -1;
+				}
 			}
 
 		}
