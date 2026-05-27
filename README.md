@@ -7,13 +7,13 @@ A low-level input streaming application designed to turn a Nintendo 3DS into a w
 The project is currently **under active development**. In its current state, it features:
 
 * **3DS Client:** Reads hardware inputs from the console and transmits the raw button bitmasks over the local network via UDP packets.
-* **PC Server:** A lightweight background server that listens for incoming UDP packets from the 3DS, decodes the bitmask data, and emulates a virtual Xbox Controller on Windows using the ViGEmBus API.
+* **PC Server:** A lightweight background server that listens for incoming UDP packets from the 3DS, decodes the bitmask data, and emulates a virtual Xbox Controller
 
 ## Project Structure
 
 * `/controler`: Visual Studio solution and source files for the Windows server application.
-* `/memoria`: Core modules and shared memory logic.
-* `/PC_server_win`: Alternative lightweight backend components for packet processing.
+* `/PC_server_win`: backend components for packet processing in linux.
+   `/PC_server_win`: Alternative backend components for packet processing on windows.
 
 ## Roadmap & Upcoming Features
 
@@ -25,7 +25,7 @@ The project is currently **under active development**. In its current state, it 
 ## Requirements (Current Setup)
 
 * A Nintendo 3DS with Homebrew access.
-* Windows PC with the **ViGEmBus** driver installed.
+* The **ViGEmBus** driver installed. (if on windows)
 * Both devices connected to the same local area network (LAN).
 
 ---
