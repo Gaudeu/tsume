@@ -1,0 +1,13 @@
+**/build/
+**/out/
+*.elf
+*.3dsx
+*.smdh
+
+**/.vs/
+**/.vscode/
+**/*.ipch
+**/*.slnx
+**/bckp/
+/memoria
+/py

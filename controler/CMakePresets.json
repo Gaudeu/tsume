@@ -1,0 +1,19 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "3ds-devkitpro",
+      "displayName": "Nintendo 3DS (devkitARM)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/3ds",
+      "toolchainFile": "/opt/devkitpro/cmake/3ds.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "DEVKITPRO": "/opt/devkitpro",
+        "DEVKITARM": "/opt/devkitpro/devkitARM"
+      }
+    }
+  ]
+}
