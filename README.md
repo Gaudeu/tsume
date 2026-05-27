@@ -29,4 +29,4 @@ The project is currently **under active development**. In its current state, it 
 * Both devices connected to the same local area network (LAN).
 
 ---
-*Disclaimer: This project is experimental and built as part of a deep dive into low-level systems programming, networking, and console homebrew development.*
+Any help is highly appreciated S2
