@@ -42,6 +42,7 @@ struct Ponto2D
 {
     float x;
     float y;
+    bool iniciaNovoTraco;
 };
 #pragma pack(pop)
 

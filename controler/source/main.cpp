@@ -57,7 +57,10 @@ int main() {
 		if (nextEstate != -1) {
 			Cena* proximaCena = nullptr;
 
-			if (nextEstate == 0) {
+			if (nextEstate == 10){
+				//enviar a matriz
+					nextEstate = -1;
+			} else if (nextEstate == 0) {
 				delete cenaAtual;
 				cenaAtual = new cenaConectado();
 				bool sucesso = network.connectToServer(ipGlobal, std::stoi(porta));//true = socket conectado ou false = erro
@@ -78,9 +81,6 @@ int main() {
 					cenaAtual = new cenaPrincipal();
 				}
 
-				if (nextEstate == 4){
-					nextEstate = -1;
-				}
 			}
 
 		}

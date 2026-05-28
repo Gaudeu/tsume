@@ -58,10 +58,10 @@ cenaConectado::cenaConectado() {
 		C2D_Color32(0, 0, 0, 255))); // pause
 
 	touchpad = new WidgetDesenho(
-		10.0f, 100.0f, 0.5f,
+		10.0f, 80.0f, 0.5f,
 		300.0f, 130.0f,
-		C2D_Color32(200, 200, 0, 255),
-		C2D_Color32(255, 255, 255, 255)
+		C2D_Color32(200, 200, 200, 255),
+		C2D_Color32(0, 0, 0, 255)
 	);
 }
 
@@ -91,10 +91,14 @@ int cenaConectado::update(const InputPacket& packet) {
         // pause aqui 
         }
 
+	}
+
+	if(touchpad != nullptr){
+
 		if(touchpad -> update(packet)){
              // envio pela rede
 			 touchpad ->limpar();
-			return 4;
+			return 10;
 		}
 	}
 	
@@ -118,10 +122,16 @@ void cenaConectado::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 	C2D_TargetClear(top, C2D_Color32(255, 255, 255, 255));
 	header->draw();
 
-	C2D_DrawRectangle(150.0f, 50.0f, 1.0f, 100.0f, 70.0f, azul, azul, azul, azul);
+	//C2D_DrawRectangle(150.0f, 50.0f, 1.0f, 100.0f, 70.0f, azul, azul, azul, azul);
 
 	C2D_SceneBegin(bottom);
 	C2D_TargetClear(bottom, C2D_Color32(255, 255, 255, 255));
+
+	C2D_DrawRectangle(0.0f, 214.0f, 0.1f, SCREEN_WIDTH_BOTTOM, 30.0f, C2D_Color32(200, 200, 200, 255), C2D_Color32(200, 200, 200, 255), C2D_Color32(200, 200, 200, 255), C2D_Color32(200, 200, 200, 255));
+
+	if (touchpad != nullptr ){
+		touchpad -> draw();
+	}
 
 	if (painelY >= -alturaPainel){
 		
@@ -157,7 +167,6 @@ void cenaConectado::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 		C2D_ViewRestore(&Matrix);
 	}
 
-    touchpad -> draw();
 
 	for (auto& btn : botoesC) 
 		{
