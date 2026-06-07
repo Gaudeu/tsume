@@ -76,12 +76,17 @@ bool NetworkManager::connectToServer(const std::string& ip, int port) {
 }
 
 
-
+void NetworkManager::sendMatrix(const std::vector<uint8_t>& matrix) {
+    if (!isConnected || sock < 0 || matrix.empty()) return;
+    
+    // Envia o array de bytes pela rede (784 bytes)
+    sendto(sock, matrix.data(), matrix.size(), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+}
 
 void NetworkManager::sendPacket(const InputPacket& packet) {
 
     
-	 //sockfd, buf, len, flags, dest_addr, addrlen
+	 
      
     if (!isConnected || sock < 0) { return; }
 
@@ -89,7 +94,7 @@ void NetworkManager::sendPacket(const InputPacket& packet) {
     if (memcmp(&packet, &lastPacket, sizeof(InputPacket)) == 0) {
         return; 
     }
-
+     //sockfd, buf, len, flags, dest_addr, addrlen
     int sent = sendto(sock, &packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    
+    lastPacket = packet;
 }

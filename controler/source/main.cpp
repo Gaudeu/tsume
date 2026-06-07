@@ -52,21 +52,36 @@ int main() {
 		if (packet.keysDown & KEY_START) break;
 		//network.sendPacket(packet);
 
-		int nextEstate = cenaAtual->update(packet);
+		int nextEstate = cenaAtual? cenaAtual->update(packet): -1;
 
 		if (nextEstate != -1) {
 			Cena* proximaCena = nullptr;
 
 			if (nextEstate == 10){
 				//enviar a matriz
+				cenaConectado* cenaC = dynamic_cast<cenaConectado*>(cenaAtual);
+				if(cenaC){
+					std::vector<uint8_t> matrixData = cenaC->touchpad->extractNormalized(28);
+
+					network.sendMatrix(matrixData);
+
+					cenaC->touchpad->limpar();
+				}
 					nextEstate = -1;
+
 			} else if (nextEstate == 0) {
 				delete cenaAtual;
 				cenaAtual = new cenaConectado();
 				bool sucesso = network.connectToServer(ipGlobal, std::stoi(porta));//true = socket conectado ou false = erro
 				info = network.getStatusMessage();
-				cenaAtual->setStatus(info);
-				conectado = true;
+				if(sucesso){
+                   cenaAtual->setStatus("IP: " + ipGlobal + "\nPORTA: " + porta);
+                  conectado = true;
+				} else {
+                  cenaAtual->setStatus(info);
+                  conectado = false;
+				}
+				
 			}
 			else {
 				conectado = false;
@@ -90,7 +105,12 @@ int main() {
 
 		// Desenha a imagem se ela existir
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-		cenaAtual->draw(top, bottom);
+		if (cenaAtual != nullptr) {
+            cenaAtual->draw(top, bottom);
+         } else {
+			C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+            C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+		 } 
 		C3D_FrameEnd(0);
 		// O terminal na tela de baixo é atualizado automaticamente pelo consoleInit
 	}

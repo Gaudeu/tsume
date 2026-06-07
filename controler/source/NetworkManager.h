@@ -4,6 +4,7 @@
 #include <string>
 #include <arpa/inet.h>
 #include "Common.h"
+#include <vector>
 
 class NetworkManager {
 private:
@@ -22,6 +23,7 @@ public:
     void disconnect();
 
     void sendPacket(const InputPacket& packet); // M�todo de envio
+    void sendMatrix(const std::vector<uint8_t>& matrix);
     std::string getStatusMessage() const { return statusMessage; }
     bool getIsConnected() const { return isConnected; }
 };

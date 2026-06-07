@@ -11,7 +11,7 @@ inline void interpolar(float& curr, float target, float v, float lim = 0.01f) {
 cenaConectado::cenaConectado() {
 	header = new PainelTopo(25.0f);
 	textBuf = C2D_TextBufNew(4096);
-
+    
 	float btnWidth = 120.0f;
 	float btnHeight = 40.0f;
 	float btnX = (SCREEN_WIDTH_BOTTOM - btnWidth) / 2.0f;
@@ -41,7 +41,7 @@ cenaConectado::cenaConectado() {
 		0.7f,
 		0.0f, 
 		0.0f, 
-		&voltarText, 
+		nullptr, 
 		C2D_Color32(255, 0, 0, 255), 
 		C2D_Color32(100, 100, 100, 255), 
 		20.0f, 
@@ -57,11 +57,22 @@ cenaConectado::cenaConectado() {
 		C2D_Color32(255, 0, 0, 255), 
 		C2D_Color32(0, 0, 0, 255))); // pause
 
+	botoesC.push_back(Botao(
+		sControl.x + 24.0f,
+		-18.0f,
+		1.0f,
+	    20.0f,
+		18.0f, 
+		nullptr, 
+		C2D_Color32(255, 0, 0, 255), 
+		C2D_Color32(0, 0, 0, 255))); // mostrar touchpad	
+
+
 	touchpad = new WidgetDesenho(
-		10.0f, 80.0f, 0.5f,
+		10.0f, 100.0f, 0.5f,
 		300.0f, 130.0f,
-		C2D_Color32(200, 200, 200, 255),
-		C2D_Color32(0, 0, 0, 255)
+		C2D_Color32(200, 200, 0, 255),
+		C2D_Color32(255, 255, 255, 255)
 	);
 }
 
@@ -90,23 +101,34 @@ int cenaConectado::update(const InputPacket& packet) {
 		if (botoesC[2].foiTocado(packet.touchX, packet.touchY)) {
         // pause aqui 
         }
+		if (botoesC[3].foiTocado(packet.touchX, packet.touchY)) {
+        // abre o touchpad
+		drawTouchpad = !drawTouchpad;
+        }
 
 	}
 
 	if(touchpad != nullptr){
-
-		if(touchpad -> update(packet)){
-             // envio pela rede
-			 touchpad ->limpar();
-			return 10;
+		if(touchpad->update(packet)){
+			processInThisFrame = true;
 		}
 	}
+	if(processInThisFrame){
+		processInThisFrame = false;
+		return 10;
+	}
+
+	if(touchpad->update(packet)){
+    processInThisFrame = true;
+
+    }
 	
 	interpolar(painelY, painelAlvo, velocidade, 0.1f);
 
 	float margemInterna = 25.0f;
 	botoesC[0].setPosicao(20.0f, painelY + margemInterna);
-	botoesC[2].setPosicao(sControl.x + 1, painelY + 26.0f);
+	botoesC[2].setPosicao(sControl.x + 1.0f, painelY + 26.0f);
+    botoesC[3].setPosicao(sControl.x + 24.0f, painelY + 26.0f);
 
     float targetIncline = painelAberto ? 3.14159f : 0.0f;
 
@@ -122,16 +144,10 @@ void cenaConectado::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 	C2D_TargetClear(top, C2D_Color32(255, 255, 255, 255));
 	header->draw();
 
-	//C2D_DrawRectangle(150.0f, 50.0f, 1.0f, 100.0f, 70.0f, azul, azul, azul, azul);
+	C2D_DrawRectangle(150.0f, 50.0f, 1.0f, 100.0f, 70.0f, azul, azul, azul, azul);
 
 	C2D_SceneBegin(bottom);
 	C2D_TargetClear(bottom, C2D_Color32(255, 255, 255, 255));
-
-	C2D_DrawRectangle(0.0f, 214.0f, 0.1f, SCREEN_WIDTH_BOTTOM, 30.0f, C2D_Color32(200, 200, 200, 255), C2D_Color32(200, 200, 200, 255), C2D_Color32(200, 200, 200, 255), C2D_Color32(200, 200, 200, 255));
-
-	if (touchpad != nullptr ){
-		touchpad -> draw();
-	}
 
 	if (painelY >= -alturaPainel){
 		
@@ -166,7 +182,12 @@ void cenaConectado::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 
 		C2D_ViewRestore(&Matrix);
 	}
-
+    
+	if (drawTouchpad && touchpad != nullptr) {
+        touchpad->draw();
+    
+    }
+    
 
 	for (auto& btn : botoesC) 
 		{

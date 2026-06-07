@@ -9,8 +9,7 @@
 class cenaConectado : public Cena {
 private:
 	PainelTopo* header;
-    WidgetDesenho* touchpad;
-
+    
 
 	C2D_TextBuf textBuf;
 	C2D_Text voltarText;
@@ -22,6 +21,8 @@ private:
 	std::vector<Botao> botoesC;
 
 	bool exibirRetangulo = false;
+	bool drawTouchpad = false;
+	bool processInThisFrame = false;
 	//dinamica do menu
 	bool painelAberto = false;
 	float painelY = -60.0f;      // Começa fora da tela (ajuste conforme a altura do painel)
@@ -44,4 +45,5 @@ public:
 	~cenaConectado();
 	int update(const InputPacket& packet) override;
 	void draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) override;
+	WidgetDesenho* touchpad;
 };
