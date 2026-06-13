@@ -17,20 +17,29 @@ set(CTR_TEX3DS_EXE   "/opt/devkitpro/tools/bin/tex3ds")
 include_directories("${DEVKITPRO}/libctru/include" "${DEVKITPRO}/portlibs/3ds/include")
 link_directories("${DEVKITPRO}/portlibs/3ds/lib")
 include_directories("source")
-
 #
+
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/romfs/gfx")
 
-add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/romfs/gfx/sprites.t3x"
-    COMMAND "${CTR_TEX3DS_EXE}" "${CMAKE_CURRENT_SOURCE_DIR}/gfx/sprites.png" -o "${CMAKE_CURRENT_SOURCE_DIR}/romfs/gfx/sprites.t3x"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/gfx/sprites.png"
+#carregar sprites
+file(GLOB SPRITE_PNGS "${CMAKE_CURRENT_SOURCE_DIR}/gfx/*.png")
+
+set(SPRITE_T3XS "")
+
+foreach(PNG_PATH ${SPRITE_PNGS})
+  get_filename_component(SPRITE_NAME ${PNG_PATH} NAME_WE)
+  set(T3X_PATH "${CMAKE_CURRENT_SOURCE_DIR}/romfs/gfx/${SPRITE_NAME}.t3x")
+  list(APPEND SPRITE_T3XS ${T3X_PATH})
+  
+  add_custom_command(
+    OUTPUT "${T3X_PATH}"
+    COMMAND "${CTR_TEX3DS_EXE}" "${PNG_PATH}" -o "${T3X_PATH}"
+    DEPENDS "${PNG_PATH}"
     VERBATIM
-    COMMENT "Convertendo sprites.png para formato 3DS..."
-)
-
-
-
+    COMMENT "Convertendo ${SPRITE_NAME}.png para formato 3DS..."
+  )
+endforeach()
+#
 
 
 
@@ -40,7 +49,8 @@ add_executable(Control
     source/InputHandler.cpp 
     source/cenaPrincipal.cpp 
     source/cenaTexto.cpp
-    "${CMAKE_CURRENT_SOURCE_DIR}/romfs/gfx/sprites.t3x"
+    #"${CMAKE_CURRENT_SOURCE_DIR}/romfs/gfx/sprites.t3x"
+    ${SPRITE_T3XS} #var dinamica
  "source/botao.h"   "source/Widget.h" "source/painel.h" "source/painelTopo.h" "source/WidgetBateria.h" "source/painelRodape.h" "source/cenaConectado.h" "source/cenaConectado.cpp" "source/saveConfig.cpp" "source/saveConfig.h")
 
 

@@ -10,7 +10,7 @@ private:
 public:
    
     PainelTopo(float altura = 30.0f)
-        : Painel(0.0f, 0.0f, 0.4f, 400.0f, altura, C2D_Color32(0, 255, 255, 255)) {
+        : Painel(0.0f, 0.0f, 0.4f, 400.0f, altura, C2D_Color32(150, 150, 150, 255)) {
 
       
         bateria = new WidgetBateria(w - 50.0f, 4.0f);

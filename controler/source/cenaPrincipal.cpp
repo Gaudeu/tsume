@@ -13,7 +13,7 @@ cenaPrincipal::cenaPrincipal() {
     header = new PainelTopo(25.0f);
     rodape = new PainelRodape();
 
-    spriteSheet = C2D_SpriteSheetLoad("romfs:/gfx/sprites.t3x");
+    spriteSheet = C2D_SpriteSheetLoad("romfs:/gfx/Asprite.t3x");
     imagem = C2D_SpriteSheetGetImage(spriteSheet, 0);
     
     textBuf = C2D_TextBufNew(4096);
@@ -40,6 +40,13 @@ cenaPrincipal::cenaPrincipal() {
     C2D_TextOptimize(&txtSim);
     C2D_TextOptimize(&txtNao); 
 
+    //conteudo dos botoes
+    conteudoBotao* txtBtnConectar = new ConteudoTexto(&conectarText);
+    conteudoBotao* txtBtnEdit = new ConteudoTexto(&editarText);
+    conteudoBotao* txtBtnsair = new ConteudoTexto(&sairText);
+    conteudoBotao* txtBtnSim = new ConteudoTexto(&txtSim);
+    conteudoBotao* txtBtnNao = new ConteudoTexto(&txtNao);
+
 
     btnColor = C2D_Color32(235, 235, 235, 255);
     corTexto = C2D_Color32(0, 255, 0, 255);
@@ -48,13 +55,18 @@ cenaPrincipal::cenaPrincipal() {
     centroY = (SCREEN_HEIGHT / 2.0f) - (BTN_HEIGHT / 2.0f);
 
 	float xBtn = getCenter(SCREEN_WIDTH_BOTTOM, BTN_WIDTH);
+
+    float btnPopUpWidth = (cPopUp.w/2);
+    float btnPopUpHeight = 30.0f;
+
+
     botoes.push_back(Botao(
         xBtn, 
         centroY - 50, 
         0.5f,
         BTN_WIDTH, 
         BTN_HEIGHT, 
-        &conectarText, 
+        txtBtnConectar, 
         btnColor, 
         C2D_Color32(200, 200, 200, 255)));
 
@@ -64,7 +76,7 @@ cenaPrincipal::cenaPrincipal() {
         0.5f,
         BTN_WIDTH, 
         BTN_HEIGHT, 
-        &editarText, 
+        txtBtnEdit, 
         btnColor, 
         C2D_Color32(200, 200, 200, 255)));
 
@@ -74,14 +86,23 @@ cenaPrincipal::cenaPrincipal() {
         0.5f,
         BTN_WIDTH, 
         BTN_HEIGHT, 
-        &sairText, 
+        txtBtnsair, 
         btnColor, 
         C2D_Color32(200, 200, 200, 255)));
 
-    botoes[0].selecionado = true;
+    botoes.push_back(Botao(
+		0.0f, 
+		235.0f, 
+		0.7f,
+		0.0f, 
+		0.0f, 
+		nullptr, 
+		C2D_Color32(255, 0, 0, 255), 
+		C2D_Color32(100, 100, 100, 255), 
+		20.0f, 
+		true));
 
-    float btnPopUpWidth = (cPopUp.w/2);
-    float btnPopUpHeight = 30.0f;
+    botoes[0].selecionado = true;
 
     botoesPopUp.push_back(Botao(
         cPopUp.x, 
@@ -89,7 +110,7 @@ cenaPrincipal::cenaPrincipal() {
         0.5f,
         btnPopUpWidth, 
         btnPopUpHeight, 
-        &txtSim,
+        txtBtnSim,
         C2D_Color32(190, 190, 190, 255), 
         C2D_Color32(160, 160, 160, 255)));
 
@@ -99,7 +120,7 @@ cenaPrincipal::cenaPrincipal() {
         0.5f,
         btnPopUpWidth, 
         btnPopUpHeight, 
-        &txtNao, 
+        txtBtnNao, 
         C2D_Color32(190, 190, 190, 255), 
         C2D_Color32(160, 160, 160, 255)));
     
@@ -161,15 +182,16 @@ int cenaPrincipal::update(const InputPacket& packet) {
         return -1; 
     }
 
-    
+    int numBotoesNavegaveis = botoes.size() - 1;
+
     if (packet.keysDown & KEY_DDOWN) {
         botoes[indiceFoco].selecionado = false;
-        indiceFoco = (indiceFoco + 1) % botoes.size();
+        indiceFoco = (indiceFoco + 1) % numBotoesNavegaveis;
         botoes[indiceFoco].selecionado = true;
     }
     else if (packet.keysDown & KEY_DUP) {
         botoes[indiceFoco].selecionado = false;
-        indiceFoco = (indiceFoco - 1 + (int)botoes.size()) % botoes.size();
+        indiceFoco = (indiceFoco - 1 + numBotoesNavegaveis) % numBotoesNavegaveis;
         botoes[indiceFoco].selecionado = true;
     }
 
@@ -200,7 +222,7 @@ void cenaPrincipal::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
     C2D_SceneBegin(top);
     C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
  
-    
+    C2D_DrawImageAt(imagem, 40.0f, 0, 0.3f, NULL, 1.0f, 1.0f);
     
 	
     C2D_DrawRectangle(meio140, 95.0f, 0.8f, 180.0f, 40.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));

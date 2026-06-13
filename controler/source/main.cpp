@@ -9,7 +9,7 @@
 #include "Common.h"
 #include "saveConfig.h"
 
-std::string ipGlobal = "192.168.0.10"; // Definição real
+std::string ipGlobal = "127.0.0.1"; // Definição real
 std::string porta = "1234";
 bool conectado = false;
 
@@ -61,11 +61,9 @@ int main() {
 				//enviar a matriz
 				cenaConectado* cenaC = dynamic_cast<cenaConectado*>(cenaAtual);
 				if(cenaC){
-					std::vector<uint8_t> matrixData = cenaC->touchpad->extractNormalized(28);
+					std::vector<uint8_t> matrixData = cenaC->touchpad->extractNormalized(40);
 
 					network.sendMatrix(matrixData);
-
-					cenaC->touchpad->limpar();
 				}
 					nextEstate = -1;
 

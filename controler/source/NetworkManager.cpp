@@ -90,11 +90,12 @@ void NetworkManager::sendPacket(const InputPacket& packet) {
      
     if (!isConnected || sock < 0) { return; }
 
-    //revisao
+    /*revisao
     if (memcmp(&packet, &lastPacket, sizeof(InputPacket)) == 0) {
         return; 
-    }
+    }*/
      //sockfd, buf, len, flags, dest_addr, addrlen
-    int sent = sendto(sock, &packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    //int sent = sendto(sock, &packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    sendto(sock, &packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
     lastPacket = packet;
 }

@@ -1,27 +1,35 @@
 #pragma once
 
 #include "Widget.h"
+#include "conteudoBotao.h"
 
 class Botao : public Widget  {
 public:
-	C2D_Text* texto;
+	conteudoBotao* conteudo;
 
-	Botao(float x, float y, float z, float w, float h,  C2D_Text* txt, u32 base, u32 foco, float r = 0.0f, bool circular = false)
-		: Widget(x, y, z, w, h, base, foco, r, circular), texto(txt) {}
+	Botao(float x, float y, float z, float w, float h,  conteudoBotao* cont, u32 base, u32 foco, float r = 0.0f, bool circular = false)
+		: Widget(x, y, z, w, h, base, foco, r, circular), conteudo(cont) {}
+
+
+	void aoClicar() {
+        
+        //auto txtAlt = dynamic_cast<ConteudoTexto*>(conteudo);
+        //if (txtAlt != nullptr) {
+        //    txtAlt->alternar();
+        //    return;
+        //}
+
+        if(conteudo != nullptr){
+			conteudo->aoClicar();
+		}
+    }
 
 	void draw() override {
 		Widget::draw();
 
-		float tw, th;
-		C2D_TextGetDimensions(texto, 0.6f, 0.6f, &tw, &th);
-		if (circular)
-		{
-        C2D_DrawText(texto, C2D_WithColor, x - (tw) / 2, y - (th) / 2, 0.6f, 0.6f, 0.6f, C2D_Color32(0, 0, 0, 255));
-		} 
-		else 
-		{
-        C2D_DrawText(texto, C2D_WithColor, x + (w - tw) / 2, y + (h - th) / 2, 0.6f, 0.6f, 0.6f, C2D_Color32(0, 0, 0, 255));
-		}
+		if (conteudo != nullptr) {
+            conteudo->draw(x, y, w, h, circular, selecionado); 
+        }
 		
 	}
 

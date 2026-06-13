@@ -4,6 +4,7 @@
 #include <string>
 
 
+
 extern bool conectado;
 extern std::string ipGlobal;
 extern std::string porta;
@@ -37,12 +38,12 @@ struct InputPacket {
     uint16_t touchX;      // Coordenada X do Touch (0 a 320)
     uint16_t touchY;      // Coordenada Y do Touch (0 a 240)
 };
-
+#pragma pack(pop)
 struct Ponto2D
 {
     float x;
     float y;
     bool iniciaNovoTraco;
 };
-#pragma pack(pop)
+
 

@@ -28,14 +28,41 @@ cenaTexto::cenaTexto() {
     C2D_TextOptimize(&botaoTextPort);
     C2D_TextOptimize(&infoText);
 
+    //conteudo botoes
+    conteudoBotao* txtBtnIP = new ConteudoTexto(&botaoTextIP);
+    conteudoBotao* txtBtnPORT = new ConteudoTexto(&botaoTextPort);
+    conteudoBotao* txtBtnConfirm = new ConteudoTexto(&botaoConfirm);
+
+
 	squareColor = C2D_Color32(255, 255, 255, 255); 
     fieldColor = C2D_Color32(240, 240, 240, 255);
     float centroX = (SCREEN_WIDTH_BOTTOM / 2.0f) - (BTN_WIDTH / 2.0f);
     float centroY = (SCREEN_HEIGHT / 2.0f) - (BTN_HEIGHT / 2.0f);
     
-    botoes.push_back(Botao(xBtnBot, centroY - 50, 0.5f, BTN_WIDTH, BTN_HEIGHT, &botaoTextIP, squareColor, C2D_Color32(200, 200, 200, 255)));
-    botoes.push_back(Botao(xBtnBot, centroY - 10, 0.5f, BTN_WIDTH, BTN_HEIGHT, &botaoTextPort, squareColor, C2D_Color32(200, 200, 200, 255)));
-    botoes.push_back(Botao(xBtnBot, centroY + 30, 0.5f, BTN_WIDTH, BTN_HEIGHT, &botaoConfirm, squareColor, C2D_Color32(200, 200, 200, 255)));
+    botoes.push_back(Botao(xBtnBot, 
+        centroY - 50, 
+        0.5f, 
+        BTN_WIDTH, 
+        BTN_HEIGHT, 
+        txtBtnIP, 
+        squareColor, 
+        C2D_Color32(200, 200, 200, 255)));
+    botoes.push_back(Botao(xBtnBot, 
+        centroY - 10, 
+        0.5f, 
+        BTN_WIDTH, 
+        BTN_HEIGHT, 
+        txtBtnPORT, 
+        squareColor, 
+        C2D_Color32(200, 200, 200, 255)));
+    botoes.push_back(Botao(xBtnBot, 
+        centroY + 30, 
+        0.5f, 
+        BTN_WIDTH, 
+        BTN_HEIGHT, 
+        txtBtnConfirm, 
+        squareColor, 
+        C2D_Color32(200, 200, 200, 255)));
     botoes[0].selecionado = true;
 }
 

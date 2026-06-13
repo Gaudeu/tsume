@@ -66,8 +66,8 @@ class WidgetDesenho: public Widget
   }
 
   //tratamento do desenho
- std::vector<uint8_t> extractNormalized(int res = 28){
-    std::vector<uint8_t> matrix(res * res, 0);
+ std::vector<uint8_t> extractNormalized(int res = 40){
+    std::vector<uint8_t> matrix((res * res)/8, 0);
 
     if(rastroCopy.empty()) return matrix;
 
@@ -94,7 +94,7 @@ class WidgetDesenho: public Widget
     float scalingFactor = (res-4)/biggest;
     float margin = 2.0f;
 
-    for(size_t i = 1; i<rastroCopy.size(); i++){
+    for(size_t i = 1; i < rastroCopy.size(); i++){
         if(rastroCopy[i].iniciaNovoTraco) continue;
         int x1 = (int)((rastroCopy[i-1].x - offsetX) * scalingFactor + margin);
         int y1 = (int)((rastroCopy[i-1].y - offsetY) * scalingFactor + margin);
@@ -111,7 +111,12 @@ class WidgetDesenho: public Widget
 
             // garante que nao vai acessar memoria ilegal
             if (xPixel >= 0 && xPixel < res && yPixel >= 0 && yPixel < res) {
-                matrix[yPixel * res + xPixel] = 255; 
+                int pixelIndex = yPixel * res + xPixel; // Índice linear do pixel (0 a 1599)
+                int byte_pos = pixelIndex / 8;          // Descobre em qual byte ele está
+                int bit_pos = pixelIndex % 8;           // Descobre qual dos 8 bits é o alvo
+
+                // Usa bitwise OR para ligar o bit no byte correto, sem apagar os outros
+                matrix[byte_pos] |= (1 << bit_pos);
             }
         }
     }
