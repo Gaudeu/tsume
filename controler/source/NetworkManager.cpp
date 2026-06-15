@@ -1,3 +1,5 @@
+//arrumar uma maneira de quando eu conecto pelo 3ds ele envia um pedido
+//de conexao e aguarda o pc confirmar para entao comecar a transmitir os packets
 #include "NetworkManager.h"
 #include <malloc.h>
 #include <string.h>

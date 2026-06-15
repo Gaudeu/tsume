@@ -17,11 +17,22 @@ cenaConectado::cenaConectado() {
 
 	spriteSheetPenOff = C2D_SpriteSheetLoad("romfs:/gfx/Csprite.t3x");
 	imgPenOff = C2D_SpriteSheetGetImage(spriteSheetPenOff, 0);
+
+	spriteSheetPlay = C2D_SpriteSheetLoad("romfs:/gfx/Dsprite.t3x");
+	imgPlay = C2D_SpriteSheetGetImage(spriteSheetPlay, 0);
+
+	spriteSheetPause = C2D_SpriteSheetLoad("romfs:/gfx/Esprite.t3x");
+	imgPause = C2D_SpriteSheetGetImage(spriteSheetPlay, 0);
+
+
 	
 
     //conteudo botoes
 	conteudoBotao* conteudoBotaoPen = new ConteudoImagem(&imgPen, &imgPenOff);
     conteudosBotoes.push_back(conteudoBotaoPen);
+
+	conteudoBotao* conteudoBotaoPlay = new ConteudoImagem(&imgPlay, &imgPause);
+    conteudosBotoes.push_back(conteudoBotaoPlay);
 
 	setStatus("IP: Aguardando...\nPORTA: ----");
 
@@ -66,7 +77,7 @@ cenaConectado::cenaConectado() {
 		0.9f,
 	    20.0f,
 		18.0f, 
-		conteudoBotaoPen, 
+		conteudoBotaoPlay, 
 		C2D_Color32(0, 255, 0, 255), 
 		C2D_Color32(0, 0, 0, 255))); // pause
 

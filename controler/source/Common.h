@@ -31,12 +31,12 @@ inline float getCenter(float screenWidth, float objectWidth) {
 #pragma pack(push, 1)
 struct InputPacket {
     uint32_t keysUp;
-    uint32_t keysDown;    // Bot�es pressionados neste frame
-    uint32_t keysHeld;    // Bot�es sendo segurados
-    int16_t circleX;      // Eixo X do Circle Pad (-150 a 150)
-    int16_t circleY;      // Eixo Y do Circle Pad
-    uint16_t touchX;      // Coordenada X do Touch (0 a 320)
-    uint16_t touchY;      // Coordenada Y do Touch (0 a 240)
+    uint32_t keysDown;    
+    uint32_t keysHeld;    
+    int16_t circleX;      
+    int16_t circleY;      
+    uint16_t touchX;      
+    uint16_t touchY;      
 };
 #pragma pack(pop)
 struct Ponto2D

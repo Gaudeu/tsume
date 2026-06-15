@@ -225,8 +225,8 @@ void cenaPrincipal::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
     C2D_DrawImageAt(imagem, 40.0f, 0, 0.3f, NULL, 1.0f, 1.0f);
     
 	
-    C2D_DrawRectangle(meio140, 95.0f, 0.8f, 180.0f, 40.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
-    C2D_DrawRectangle(meio120, 100.0f, 0.9f, 170.0f, 30.0f, btnColor, btnColor, btnColor, btnColor);
+    C2D_DrawRectangle(meio140, 95.0f, 0.8f, 160.0f, 40.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
+    C2D_DrawRectangle(meio120, 100.0f, 0.9f, 150.0f, 30.0f, btnColor, btnColor, btnColor, btnColor);
 
     float larguraIP, alturaIP;
     C2D_TextGetDimensions(&ipText, escalaTexto, escalaTexto, &larguraIP, &alturaIP);
@@ -244,7 +244,7 @@ void cenaPrincipal::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 
     header->draw();
     
-    // TELA INFERIOR
+    
     C2D_SceneBegin(bottom);
     C2D_TargetClear(bottom, C2D_Color32(255, 255, 255, 255));
 

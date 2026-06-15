@@ -25,6 +25,7 @@ void manipulador_sigint(int sinal) {
 
 #pragma pack(push, 1)
 struct InputPacket {
+    uint32_t keysUp;
     uint32_t keysDown;
     uint32_t keysHeld;
     int16_t circleX, circleY;
@@ -73,6 +74,8 @@ int main() {
     ioctl(uifd, UI_SET_KEYBIT, BTN_EAST);  
     ioctl(uifd, UI_SET_KEYBIT, BTN_NORTH); 
     ioctl(uifd, UI_SET_KEYBIT, BTN_WEST);  
+    ioctl(uifd, UI_SET_KEYBIT, BTN_TR); 
+    ioctl(uifd, UI_SET_KEYBIT, BTN_TL); 
     ioctl(uifd, UI_SET_KEYBIT, BTN_START);
     ioctl(uifd, UI_SET_KEYBIT, BTN_SELECT);
 
@@ -146,7 +149,7 @@ int main() {
     while (rodando) {
         uint8_t buffer[1024];
 
-        ssize_t bytesReceived = recvfrom(sock, buffer, sizeof(packet), 0,
+        ssize_t bytesReceived = recvfrom(sock, buffer, sizeof(buffer), 0,
                                          reinterpret_cast<struct sockaddr*>(&clientAddr), &addrLen);
         
         if (bytesReceived < 0) {
@@ -155,7 +158,6 @@ int main() {
         }
 
         if (bytesReceived == sizeof(InputPacket)) {
-            
             std::memcpy(&packet, buffer, sizeof(InputPacket));
         } 
         else if (bytesReceived == 784) {
@@ -186,6 +188,8 @@ int main() {
         emit_event(uifd, EV_KEY, BTN_EAST,  (packet.keysHeld & BIT_B) ? 1 : 0);
         emit_event(uifd, EV_KEY, BTN_NORTH, (packet.keysHeld & BIT_X) ? 1 : 0);
         emit_event(uifd, EV_KEY, BTN_WEST,  (packet.keysHeld & BIT_Y) ? 1 : 0);
+        emit_event(uifd, EV_KEY, BTN_TR,  (packet.keysHeld & BIT_R) ? 1 : 0);
+        emit_event(uifd, EV_KEY, BTN_TL,  (packet.keysHeld & BIT_L) ? 1 : 0);
         emit_event(uifd, EV_KEY, BTN_START, (packet.keysHeld & BIT_START) ? 1 : 0);
         emit_event(uifd, EV_KEY, BTN_SELECT,(packet.keysHeld & BIT_SELECT) ? 1 : 0);
 

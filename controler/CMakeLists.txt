@@ -63,10 +63,10 @@ function(add_3dsx_target target)
 
     add_custom_command(TARGET ${target} POST_BUILD
     
-        # 1.Curto 2.Longo 3.Autor 4.Ícone 5.ArquivoSaída
+        # 1.Curto 2.Longo 3.Autor 4.Icone 5.ArquivoSaida
         COMMAND "${CTR_SMDHTOOL_EXE}" --create "Controle3DS" "Remote Controller for PC" "Gaud" "${ICON_PATH}" "${SMDH_FILE}"
         
-        # Gerar o executavel usando o SMDH e o ROMFS
+        # gerar o executavel usando o SMDH e o ROMFS
         COMMAND "${CTR_3DSXTOOL_EXE}" "$<TARGET_FILE:${target}>" "${OUTPUT_3DSX}" "--smdh=${SMDH_FILE}" "--romfs=${CMAKE_CURRENT_SOURCE_DIR}/romfs"
         
         COMMENT "Gerando arquivo executavel..."

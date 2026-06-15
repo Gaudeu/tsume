@@ -10,8 +10,8 @@ class cenaConectado : public Cena {
 private:
 	PainelTopo* header;
     
-	C2D_SpriteSheet spriteSheetPen, spriteSheetPenOff;
-    C2D_Image imgPen, imgPenOff;
+	C2D_SpriteSheet spriteSheetPen, spriteSheetPenOff, spriteSheetPlay, spriteSheetPause;
+    C2D_Image imgPen, imgPenOff, imgPlay, imgPause;
 
 	C2D_TextBuf textBuf;
 	C2D_Text voltarText;

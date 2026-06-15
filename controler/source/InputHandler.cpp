@@ -3,7 +3,7 @@
 InputPacket InputHandler::scan() {
     hidScanInput(); 
 
-        InputPacket packet;
+        InputPacket packet{};
     packet.keysDown = hidKeysDown(); 
         packet.keysHeld = hidKeysHeld(); 
 
