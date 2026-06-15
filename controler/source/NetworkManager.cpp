@@ -22,6 +22,10 @@ NetworkManager::~NetworkManager() {                 //destructor
     disconnect();
 }
 
+void NetworkManager::pauseConnection(){
+    
+}
+
 void NetworkManager::disconnect() {
     if (sock >= 0) {
         close(sock);

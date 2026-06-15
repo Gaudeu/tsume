@@ -67,6 +67,8 @@ int main() {
 				}
 					nextEstate = -1;
 
+			} else if (nextEstate == 11) {
+				//network.pauseConnection()
 			} else if (nextEstate == 0) {
 				delete cenaAtual;
 				cenaAtual = new cenaConectado();

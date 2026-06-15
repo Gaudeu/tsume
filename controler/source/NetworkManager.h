@@ -20,9 +20,10 @@ public:
     ~NetworkManager(); 
 
     bool connectToServer(const std::string& ip, int port);
+    void pauseConnection();
     void disconnect();
 
-    void sendPacket(const InputPacket& packet); // M�todo de envio
+    void sendPacket(const InputPacket& packet); 
     void sendMatrix(const std::vector<uint8_t>& matrix);
     std::string getStatusMessage() const { return statusMessage; }
     bool getIsConnected() const { return isConnected; }

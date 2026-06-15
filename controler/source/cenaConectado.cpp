@@ -140,7 +140,7 @@ int cenaConectado::update(const InputPacket& packet) {
 			return 3; // Volta para cenaPrincipal
 		}
 		if (botoesC[2]->foiTocado(packet.touchX, packet.touchY)) {
-        // pause aqui 
+        // pause aqui return 11;
         }
 		if (botoesC[3]->foiTocado(packet.touchX, packet.touchY)) {
         // abre o touchpad
