@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h> 
+#include <arpa/inet.h>
 
 // emular controle
 #include <linux/uinput.h>
@@ -25,6 +26,7 @@ void manipulador_sigint(int sinal) {
 
 #pragma pack(push, 1)
 struct InputPacket {
+    uint8_t comando;
     uint32_t keysUp;
     uint32_t keysDown;
     uint32_t keysHeld;
@@ -126,7 +128,7 @@ int main() {
 
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(1234);
+    serverAddr.sin_port = htons(12345);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(sock, reinterpret_cast<struct sockaddr*>(&serverAddr), sizeof(serverAddr)) < 0) {
@@ -152,7 +154,7 @@ int main() {
         ssize_t bytesReceived = recvfrom(sock, buffer, sizeof(buffer), 0,
                                          reinterpret_cast<struct sockaddr*>(&clientAddr), &addrLen);
         
-        if (bytesReceived < 0) {
+     if (bytesReceived < 0) {
             usleep(1000); 
             continue;
         }
@@ -169,6 +171,30 @@ int main() {
             // Pacote quebrado ou desconhecido, apenas ignora
             continue;
         }
+
+     if(packet.comando == 0){
+            std::cout << "\n[REDE] Solicitação recebida de: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
+            std::cout << "Pressione 'S' para aceitar ou 'N' para recusar: ";
+
+            char resposta;
+            std::cin >> resposta;
+
+            InputPacket respostaPacote{};
+
+            if (resposta == 's' || resposta == 'S') {
+        respostaPacote.comando = 1; // 1 = SIM
+        std::cout << "Conexão aceita! Iniciando recepção dos controles..." << std::endl;
+        } else {
+        respostaPacote.comando = 4; // 4 = NÃO
+        std::cout << "Conexão recusada." << std::endl;
+        }
+
+        sendto(sock, &respostaPacote, sizeof(respostaPacote), 0, (struct sockaddr*)&clientAddr, addrLen);
+
+        continue;
+
+      }  else if (packet.comando == 2){                       
+        
 
         //debug
         bool botao_A_pressionado_agora = (packet.keysHeld & BIT_A);
@@ -201,6 +227,7 @@ int main() {
         emit_event(uifd, EV_ABS, ABS_Y, ly);
 
         emit_event(uifd, EV_SYN, SYN_REPORT, 0);
+        }
     }
 
     std::cout << "\n=======================" << std::endl;

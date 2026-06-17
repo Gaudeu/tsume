@@ -12,8 +12,8 @@ private:
     struct sockaddr_in server_addr;
     uint32_t* soc_buffer; // buffer necesserio para o socInit do 3DS 
     std::string statusMessage; // vai guardar nossos erros ou sucesso
-    InputPacket lastPacket;
     bool isConnected;
+    int tempoEspera = 0;
 
 public:
     NetworkManager();
@@ -22,11 +22,11 @@ public:
     bool connectToServer(const std::string& ip, int port);
     void pauseConnection();
     void disconnect();
-
+    int checkConfirmation();
     void sendPacket(const InputPacket& packet); 
     void sendMatrix(const std::vector<uint8_t>& matrix);
     std::string getStatusMessage() const { return statusMessage; }
-    bool getIsConnected() const { return isConnected; }
+    //bool getIsConnected() const { return isConnected; }
 };
 
 #endif

@@ -12,12 +12,7 @@ public:
 
 
 	void aoClicar() {
-        
-        //auto txtAlt = dynamic_cast<ConteudoTexto*>(conteudo);
-        //if (txtAlt != nullptr) {
-        //    txtAlt->alternar();
-        //    return;
-        //}
+        //revisar depois
 
         if(conteudo != nullptr){
 			conteudo->aoClicar();

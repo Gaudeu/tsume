@@ -75,10 +75,48 @@ bool NetworkManager::connectToServer(const std::string& ip, int port) {
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-    isConnected = true;
-    statusMessage = "Rede pronta! Mirando em " + ip + ":" + std::to_string(port);
+    //solicitacao
+    InputPacket solicitacao{};
+    solicitacao.comando = 0;
+    sendto(sock, &solicitacao, sizeof(solicitacao), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
+    isConnected = false;
+    tempoEspera = 0;
+    statusMessage = "Aguardando confirmação do servidor...";
+
+    //isConnected = true;
+    //statusMessage = "Rede pronta! Mirando em " + ip + ":" + std::to_string(port);
     return true;
 
+}
+
+int NetworkManager::checkConfirmation(){
+    tempoEspera++;
+    if (tempoEspera > 900) {
+        isConnected = false;
+        statusMessage = "Conexao falhou (Tempo Esgotado). Tente novamente.";
+        return -1; // Retornamos -1 para indicar Timeout/Falha
+    }
+
+    InputPacket pacoteRecebido{};
+    struct sockaddr_in fromAddr;
+    socklen_t fromLen = sizeof(fromAddr);
+
+    ssize_t bytes = recvfrom(sock, &pacoteRecebido, sizeof(pacoteRecebido), 0, (struct sockaddr*)&fromAddr, &fromLen);
+
+    if (bytes==sizeof(InputPacket)) {
+        if (pacoteRecebido.comando == 1) { // 1 = PC disse SIM
+            isConnected = true;
+            statusMessage = "Conectado com sucesso!";
+            return 1;
+        } else if (pacoteRecebido.comando == 4) {
+            
+            isConnected = false;
+            statusMessage = "Conexao recusada pelo servidor.";
+            return -1; 
+        }
+    }
+    return 0;
 }
 
 
@@ -96,12 +134,5 @@ void NetworkManager::sendPacket(const InputPacket& packet) {
      
     if (!isConnected || sock < 0) { return; }
 
-    /*revisao
-    if (memcmp(&packet, &lastPacket, sizeof(InputPacket)) == 0) {
-        return; 
-    }*/
-     //sockfd, buf, len, flags, dest_addr, addrlen
-    //int sent = sendto(sock, &packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
     sendto(sock, &packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    lastPacket = packet;
 }

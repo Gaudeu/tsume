@@ -5,7 +5,7 @@
 
 
 
-extern bool conectado;
+extern int estadoConexao;
 extern std::string ipGlobal;
 extern std::string porta;
 
@@ -30,13 +30,15 @@ inline float getCenter(float screenWidth, float objectWidth) {
 
 #pragma pack(push, 1)
 struct InputPacket {
+    uint8_t comando;  //0: solicitando, 1: pc disse sim, 2: conectado, 3: falhou
     uint32_t keysUp;
     uint32_t keysDown;    
     uint32_t keysHeld;    
     int16_t circleX;      
     int16_t circleY;      
     uint16_t touchX;      
-    uint16_t touchY;      
+    uint16_t touchY;    
+    
 };
 #pragma pack(pop)
 struct Ponto2D

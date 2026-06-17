@@ -70,7 +70,7 @@ public:
         // 3. RETÂNGULO VERMELHO À DIREITA
         // Posicionado 10 pixels após a última linha possível (18 + 10 = 28)
         // Usamos x + posX para garantir que ele siga o painel
-        if (conectado == true) {
+        if (estadoConexao == 2) {
             C2D_DrawRectangle(x + posX + 28.0f, y + base - 14.0f, 0.5f, 6.0f, 14.0f,
                 corVerde, corVerde, corVerde, corVerde);
         }

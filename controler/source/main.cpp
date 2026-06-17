@@ -10,8 +10,8 @@
 #include "saveConfig.h"
 
 std::string ipGlobal = "127.0.0.1"; // Definição real
-std::string porta = "1234";
-bool conectado = false;
+std::string porta = "12345";
+int estadoConexao = 0;//0: desconectado, 1:aguardando confirmacao, 2: conectado
 
 
 #define SCREEN_WIDTH 400
@@ -70,21 +70,21 @@ int main() {
 			} else if (nextEstate == 11) {
 				//network.pauseConnection()
 			} else if (nextEstate == 0) {
-				delete cenaAtual;
-				cenaAtual = new cenaConectado();
+				
 				bool sucesso = network.connectToServer(ipGlobal, std::stoi(porta));//true = socket conectado ou false = erro
-				info = network.getStatusMessage();
 				if(sucesso){
-                   cenaAtual->setStatus("IP: " + ipGlobal + "\nPORTA: " + porta);
-                  conectado = true;
+                  cenaAtual->setStatus(network.getStatusMessage());
+				  estadoConexao = 1;
+                  
 				} else {
                   cenaAtual->setStatus(info);
-                  conectado = false;
+				  estadoConexao = 0;
+                  
 				}
 				
 			}
 			else {
-				conectado = false;
+				
 				delete cenaAtual;
 				cenaAtual = nullptr;
 				if (nextEstate == 2) { break; };
@@ -99,7 +99,27 @@ int main() {
 			}
 
 		}
-		if (conectado) {
+
+		if (estadoConexao == 1) {
+			int status = network.checkConfirmation();
+            if (status==1) {
+                estadoConexao = 2;
+                
+				
+				delete cenaAtual;
+				cenaAtual = new cenaConectado();
+				cenaAtual->setStatus("IP: " + ipGlobal + "\nPORTA: " + porta);
+
+                 
+          } else if (status == -1) {
+                estadoConexao = 0;
+                
+                cenaAtual->setStatus(network.getStatusMessage());
+            }
+        }
+
+		if (estadoConexao == 2) {
+			packet.comando = 2;
 			network.sendPacket(packet);
 		}
 
