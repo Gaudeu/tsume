@@ -11,19 +11,32 @@ class conteudoBotao{
 class ConteudoTexto : public conteudoBotao {
   private:
     C2D_Text* texto;
+    float escala;
+    bool centralizar;
   public:
-    ConteudoTexto(C2D_Text* txt) : texto(txt) {}
+    ConteudoTexto(C2D_Text* txt, float escalaTexto = 0.6f, bool alinhamentoCentral = true)
+     : texto(txt),escala(escalaTexto), centralizar(alinhamentoCentral) {}
     
     void draw(float bx, float by, float bw, float bh, bool circular, bool selecionado) override {
         float tw, th;
-        C2D_TextGetDimensions(texto, 0.6f, 0.6f, &tw, &th);
+        C2D_TextGetDimensions(texto, escala, escala, &tw, &th);
         
         if (circular) {
             
-            C2D_DrawText(texto, C2D_WithColor, bx - tw / 2, by - th / 2, 0.6f, 0.6f, 0.6f, C2D_Color32(0, 0, 0, 255));
+            C2D_DrawText(texto, C2D_WithColor, bx - tw / 2, by - th / 2, 0.6f, escala, escala, C2D_Color32(0, 0, 0, 255));
         } else {
             
-            C2D_DrawText(texto, C2D_WithColor, bx + (bw - tw) / 2, by + (bh - th) / 2, 0.6f, 0.6f, 0.6f, C2D_Color32(0, 0, 0, 255));
+            float posX;
+            
+            
+            if (centralizar) {
+                posX = bx + (bw - tw) / 2; 
+            } else {
+                posX = bx + 5.0f; 
+            }
+
+            
+            C2D_DrawText(texto, C2D_WithColor, posX, by + (bh - th) / 2, 0.6f, escala, escala, C2D_Color32(0, 0, 0, 255));
         }
     }
 };

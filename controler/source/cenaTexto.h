@@ -12,10 +12,14 @@ class cenaTexto : public Cena {
 private:
     C2D_TextBuf staticBuf;
     C2D_Text infoText;
-    C2D_Text botaoTextIP, botaoTextPort, botaoConfirm;
+    C2D_Text help;
+    C2D_Text botaoTextIP, botaoTextPort, botaoConfirm, ipText, portaText, deadzoneText;
+    C2D_Text seta,invertAxisY, deadzone , emularParaQualStick, swapABandXY, clearTop;//configuraçoes
     C2D_Text parametersText;
     u32 squareColor, fieldColor;
     std::vector<Botao> botoes;
+    std::vector<std::vector<Botao>> paginasBotoes;
+    int paginaAtual = 0;
     int indiceFoco = 0;
 
     std::string ipTemp;
