@@ -37,7 +37,7 @@ cenaTexto::cenaTexto() {
     {&botaoConfirm,   "Ok"},
     {&seta,           ">"},
     {&help, "?"},
-    {&deadzone, "DeadZone do \n analogico/"},
+    {&deadzone, "(ok)"},//DeadZone do \n analogico/
     {&invertAxisY, "inverter eixo Y /"},
     {&emularParaQualStick, "Cpad será emulado para qual analogico? /"},
     {&swapABandXY, "trocar os botoes XY e AB? /"},

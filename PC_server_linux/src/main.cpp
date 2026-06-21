@@ -18,6 +18,8 @@
 
 std::atomic<bool> rodando(true);
 
+int porta = 12345;
+
 void manipulador_sigint(int sinal) {
     if (sinal == SIGINT) {
         rodando = false; 
@@ -66,7 +68,7 @@ int main() {
 
     int uifd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (uifd < 0) {
-        std::cerr << "Erro ao abrir /dev/uinput. Garanta que rodou com sudo!" << std::endl;
+        std::cerr << "Erro ao abrir /dev/uinput." << std::endl;
         return -1;
     }
 
@@ -78,6 +80,10 @@ int main() {
     ioctl(uifd, UI_SET_KEYBIT, BTN_WEST);  
     ioctl(uifd, UI_SET_KEYBIT, BTN_TR); 
     ioctl(uifd, UI_SET_KEYBIT, BTN_TL); 
+    ioctl(uifd, UI_SET_KEYBIT, BTN_DPAD_DOWN);
+    ioctl(uifd, UI_SET_KEYBIT, BTN_DPAD_UP);
+    ioctl(uifd, UI_SET_KEYBIT, BTN_DPAD_LEFT);
+    ioctl(uifd, UI_SET_KEYBIT, BTN_DPAD_RIGHT);
     ioctl(uifd, UI_SET_KEYBIT, BTN_START);
     ioctl(uifd, UI_SET_KEYBIT, BTN_SELECT);
 
@@ -128,18 +134,18 @@ int main() {
 
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(12345);
+    serverAddr.sin_port = htons(porta);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(sock, reinterpret_cast<struct sockaddr*>(&serverAddr), sizeof(serverAddr)) < 0) {
-        std::cerr << "Erro ao reservar a porta 12345." << std::endl;
+        std::cerr << "Erro ao reservar a porta." << std::endl;
         close(sock);
         ioctl(uifd, UI_DEV_DESTROY);
         close(uifd);
         return -1;
     }
 
-    std::cout << ">> Servidor UDP ouvindo na porta 12345. Aguardando 3DS..." << std::endl;
+    std::cout << ">> Servidor UDP ouvindo na PORTA "". Aguardando 3DS..." << std::endl;
 
     InputPacket packet;
     sockaddr_in clientAddr{};
@@ -164,7 +170,7 @@ int main() {
         } 
         else if (bytesReceived == 784) {
             
-            // ignoramos por enquanto
+            // matriz... ignoramos por enquanto
             continue; 
         } 
         else {
@@ -218,6 +224,10 @@ int main() {
         emit_event(uifd, EV_KEY, BTN_TL,  (packet.keysHeld & BIT_L) ? 1 : 0);
         emit_event(uifd, EV_KEY, BTN_START, (packet.keysHeld & BIT_START) ? 1 : 0);
         emit_event(uifd, EV_KEY, BTN_SELECT,(packet.keysHeld & BIT_SELECT) ? 1 : 0);
+        emit_event(uifd, EV_KEY, BTN_DPAD_DOWN,(packet.keysHeld & BIT_DDOWN) ? 1 : 0);
+        emit_event(uifd, EV_KEY, BTN_DPAD_UP,(packet.keysHeld & BIT_DUP) ? 1 : 0);
+        emit_event(uifd, EV_KEY, BTN_DPAD_LEFT,(packet.keysHeld & BIT_DLEFT) ? 1 : 0);
+        emit_event(uifd, EV_KEY, BTN_DPAD_RIGHT,(packet.keysHeld & BIT_DRIGHT) ? 1 : 0);
 
         // MAPEAMENTO DOS ANALÓGICOS 
         int32_t lx = Scale3DSToLinuxAxis(packet.circleX);
