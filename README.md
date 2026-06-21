@@ -15,18 +15,3 @@ The project is currently **under active development**. In its current state, it 
 * `/PC_server_win`: backend components for packet processing in linux.
    `/PC_server_win`: Alternative backend components for packet processing on windows.
 
-## Roadmap & Upcoming Features
-
-- [ ] Complete UI overhaul for the 3DS client application using Citro2D.
-- [ ] Integration of the Circle Pad and C-Stick analog input mapping.
-- [ ] Cross-platform Linux support for the PC server workstation.
-- [ ] Configuration UI on the PC server to customize button mappings.
-
-## Requirements (Current Setup)
-
-* A Nintendo 3DS with Homebrew access.
-* The **ViGEmBus** driver installed. (if on windows)
-* Both devices connected to the same local area network (LAN).
-
----
-Any help is highly appreciated S2
