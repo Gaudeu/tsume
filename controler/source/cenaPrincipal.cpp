@@ -20,15 +20,15 @@ cenaPrincipal::cenaPrincipal() {
     dynamicBuf = C2D_TextBufNew(1024);
 
     C2D_TextParse(&statusText, textBuf, statusConexao.c_str());
-    C2D_TextParse(&conectarText, textBuf, "Conectar");
-    C2D_TextParse(&editarText, textBuf, "Editar");
+    C2D_TextParse(&conectarText, textBuf, "Connect");
+    C2D_TextParse(&editarText, textBuf, "Edit");
     C2D_TextParse(&sairText, textBuf, "Sair");
     C2D_TextParse(&ipText, textBuf, ipGlobal.c_str());
     C2D_TextParse(&portaText, textBuf, porta.c_str());
     C2D_TextParse(&simpleColon, textBuf, ":");
-     C2D_TextParse(&msgPopUp, textBuf, "fechar do programa?");
-    C2D_TextParse(&txtSim, textBuf, "Sim");
-    C2D_TextParse(&txtNao, textBuf, "Não");
+     C2D_TextParse(&msgPopUp, textBuf, "this will close the app?");
+    C2D_TextParse(&txtSim, textBuf, "Ok");
+    C2D_TextParse(&txtNao, textBuf, "Calcel");
     C2D_TextOptimize(&simpleColon);
     C2D_TextOptimize(&portaText);
     C2D_TextOptimize(&ipText);

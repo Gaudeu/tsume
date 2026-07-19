@@ -5,6 +5,7 @@
 #include <cmath>
 #include <atomic>   
 #include <csignal>  
+#include <cctype>
 
 // rede
 #include <sys/socket.h>
@@ -19,12 +20,10 @@
 std::atomic<bool> rodando(true);
 
 int porta = 12345;
-
-void manipulador_sigint(int sinal) {
-    if (sinal == SIGINT) {
-        rodando = false; 
-    }
-}
+int sockGlobal = -1;
+sockaddr_in clientAddrGlobal{};
+socklen_t addrLenGlobal = sizeof(clientAddrGlobal);
+bool clienteConectado = false;
 
 #pragma pack(push, 1)
 struct InputPacket {
@@ -36,6 +35,21 @@ struct InputPacket {
     uint16_t touchX, touchY;
 };
 #pragma pack(pop)
+
+void manipulador_sigint(int sinal) { //tambem aceita SIGTERM
+    if (sinal == SIGINT || sinal == SIGTERM && sockGlobal != -1) {
+        if(clienteConectado){
+           InputPacket avisoMorte{};
+           avisoMorte.comando = 6;
+           sendto(sockGlobal, &avisoMorte, sizeof(avisoMorte), 0, 
+                  (struct sockaddr*)&clientAddrGlobal, addrLenGlobal);
+        }
+        
+
+        rodando = false; 
+    }
+}
+
 
 enum {
     BIT_A = 0x1, BIT_B = 0x2, BIT_SELECT = 0x4, BIT_START = 0x8,
@@ -58,12 +72,81 @@ void emit_event(int fd, uint16_t type, uint16_t code, int32_t value) {
     write(fd, &ie, sizeof(ie));
 }
 
-int main() {
+int ascii_to_keycode(char c, bool &shift) {
+    shift = false;
+    
+    
+    if (std::isupper(c)) {
+        shift = true;
+        c = std::tolower(c);
+    }
+    
+    switch (c) {
+        case 'a': return KEY_A; case 'b': return KEY_B; case 'c': return KEY_C;
+        case 'd': return KEY_D; case 'e': return KEY_E; case 'f': return KEY_F;
+        case 'g': return KEY_G; case 'h': return KEY_H; case 'i': return KEY_I;
+        case 'j': return KEY_J; case 'k': return KEY_K; case 'l': return KEY_L;
+        case 'm': return KEY_M; case 'n': return KEY_N; case 'o': return KEY_O;
+        case 'p': return KEY_P; case 'q': return KEY_Q; case 'r': return KEY_R;
+        case 's': return KEY_S; case 't': return KEY_T; case 'u': return KEY_U;
+        case 'v': return KEY_V; case 'w': return KEY_W; case 'x': return KEY_X;
+        case 'y': return KEY_Y; case 'z': return KEY_Z;
+        case '1': return KEY_1; case '2': return KEY_2; case '3': return KEY_3;
+        case '4': return KEY_4; case '5': return KEY_5; case '6': return KEY_6;
+        case '7': return KEY_7; case '8': return KEY_8; case '9': return KEY_9;
+        case '0': return KEY_0;
+        case ' ': return KEY_SPACE;
+        case '\n': return KEY_ENTER;
+        case '\b': return KEY_BACKSPACE;
+        default: return 0; // ignora caracteres não mapeados
+    }
+}
+
+void type_string(int uifd, const char* str) {
+    for (size_t i = 0; i < std::strlen(str); ++i) {
+        bool shift;
+        int keycode = ascii_to_keycode(str[i], shift);
+        
+        if (keycode == 0) continue; // pula o que não souber digitar
+
+        // shift se necessario
+        if (shift) {
+            emit_event(uifd, EV_KEY, KEY_LEFTSHIFT, 1);
+            emit_event(uifd, EV_SYN, SYN_REPORT, 0);
+        }
+
+        // Pressiona e solta a tecla
+        emit_event(uifd, EV_KEY, keycode, 1);
+        emit_event(uifd, EV_SYN, SYN_REPORT, 0);
+        
+        emit_event(uifd, EV_KEY, keycode, 0);
+        emit_event(uifd, EV_SYN, SYN_REPORT, 0);
+
+        // Solta o Shift se foi usado
+        if (shift) {
+            emit_event(uifd, EV_KEY, KEY_LEFTSHIFT, 0);
+            emit_event(uifd, EV_SYN, SYN_REPORT, 0);
+        }
+    }
+}
+
+int main(int argc, char* argv[]) {
+    setvbuf(stdout, NULL, _IONBF, 0);
+
+    if (argc > 1) {
+        porta = std::atoi(argv[1]);
+    }
+
+    int to_right = 0;
+    if (argc>2){
+        to_right = std::atoi(argv[2]);
+    }
+
     std::signal(SIGINT, manipulador_sigint);  
+    std::signal(SIGTERM, manipulador_sigint);
 
     std::cout << "=========================================" << std::endl;
-    std::cout << "servidor iniciado!!" << std::endl;
-    std::cout << "Pressione Ctrl+C a qualquer momento para sair." << std::endl;
+    std::cout << "servidor initialized" << std::endl;
     std::cout << "=========================================" << std::endl;
 
     int uifd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
@@ -91,6 +174,15 @@ int main() {
     ioctl(uifd, UI_SET_EVBIT, EV_ABS);
     ioctl(uifd, UI_SET_ABSBIT, ABS_X);
     ioctl(uifd, UI_SET_ABSBIT, ABS_Y);
+    ioctl(uifd, UI_SET_ABSBIT, ABS_RX); 
+    ioctl(uifd, UI_SET_ABSBIT, ABS_RY);
+
+    for (int i = KEY_ESC; i <= KEY_SPACE; i++) {
+        ioctl(uifd, UI_SET_KEYBIT, i);
+    }
+    ioctl(uifd, UI_SET_KEYBIT, KEY_LEFTSHIFT); // Para permitir maiúsculas
+    ioctl(uifd, UI_SET_KEYBIT, KEY_BACKSPACE);
+    ioctl(uifd, UI_SET_KEYBIT, KEY_ENTER);
 
     
     struct uinput_user_dev uud{};
@@ -101,14 +193,14 @@ int main() {
     uud.id.product = 0x028e; // Xbox 360 Controller
     
     
-    uud.absmin[ABS_X] = -32768;
-    uud.absmax[ABS_X] = 32767;
-    uud.absmin[ABS_Y] = -32768;
-    uud.absmax[ABS_Y] = 32767;
+    uud.absmin[ABS_X] = -32768; uud.absmax[ABS_X] = 32767;
+    uud.absmin[ABS_Y] = -32768; uud.absmax[ABS_Y] = 32767;
+    uud.absmin[ABS_RX] = -32768; uud.absmax[ABS_RX] = 32767;
+    uud.absmin[ABS_RY] = -32768; uud.absmax[ABS_RY] = 32767;
 
     
     if (write(uifd, &uud, sizeof(uud)) < 0) {
-        std::cerr << "Erro ao escrever configuracao uinput_user_dev" << std::endl;
+        std::cerr << "Error on writing in uinput_user_dev" << std::endl;
         close(uifd);
         return -1;
     }
@@ -119,9 +211,11 @@ int main() {
         return -1;
     }
 
-    std::cout << ">> Controle Virtual criado via uinput com sucesso!" << std::endl;
+    std::cout << ">> Virtual controller created sucessfully" << std::endl;
 
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    
+
     if (sock < 0) {
         std::cerr << "Falha ao criar socket UDP." << std::endl;
         ioctl(uifd, UI_DEV_DESTROY);
@@ -145,7 +239,7 @@ int main() {
         return -1;
     }
 
-    std::cout << ">> Servidor UDP ouvindo na PORTA "". Aguardando 3DS..." << std::endl;
+    std::cout << ">> UDP SERVER listening on PORT "<< porta <<". waiting for 3DS..." << std::endl;
 
     InputPacket packet;
     sockaddr_in clientAddr{};
@@ -165,41 +259,70 @@ int main() {
             continue;
         }
 
+        if (buffer[0] == 5) {
+            char text[256];
+            std::memset(text, 0, sizeof(text));
+            
+            
+            int text_syze = std::min((int)bytesReceived - 1, 255);
+            std::memcpy(text, buffer + 1, text_syze);
+            
+            std::cout << "[NETWORK] Digitando texto: " << text << std::endl;
+            type_string(uifd, text);
+            continue; 
+        }
+
         if (bytesReceived == sizeof(InputPacket)) {
             std::memcpy(&packet, buffer, sizeof(InputPacket));
+
+            if (packet.comando == 8) {
+             InputPacket pong{};
+             pong.comando = 9;
+             sendto(sock, &pong, sizeof(pong), 0, reinterpret_cast<struct sockaddr*>(&clientAddr), addrLen);
+             continue; // Já tratamos, vai para o proximo
+    }
         } 
-        else if (bytesReceived == 784) {
-            
-            // matriz... ignoramos por enquanto
+        else if (bytesReceived == 200) {
+            std::cout << "[NETWORK] Matriz recebida " << std::endl;
+            // matriz... 
             continue; 
         } 
         else {
-            // Pacote quebrado ou desconhecido, apenas ignora
+            // pacote quebrado ou desconhecido, apenas ignora
             continue;
         }
 
      if(packet.comando == 0){
-            std::cout << "\n[REDE] Solicitação recebida de: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
-            std::cout << "Pressione 'S' para aceitar ou 'N' para recusar: ";
+            std::cout << "[NETWORK] request received FROM: " << inet_ntoa(clientAddr.sin_addr) << std::endl;
 
             char resposta;
             std::cin >> resposta;
 
             InputPacket respostaPacote{};
 
-            if (resposta == 's' || resposta == 'S') {
-        respostaPacote.comando = 1; // 1 = SIM
-        std::cout << "Conexão aceita! Iniciando recepção dos controles..." << std::endl;
-        } else {
-        respostaPacote.comando = 4; // 4 = NÃO
-        std::cout << "Conexão recusada." << std::endl;
-        }
+            if (resposta == 'y' || resposta == 'Y') {
+             respostaPacote.comando = 1; // 1 = SIM
 
-        sendto(sock, &respostaPacote, sizeof(respostaPacote), 0, (struct sockaddr*)&clientAddr, addrLen);
+             sockGlobal = sock;
+             clientAddrGlobal = clientAddr;
+             clienteConectado = true;
 
-        continue;
+             std::cout << "Connection established! initializing controls..." << std::endl;
+             clientAddrGlobal = clientAddr;
 
-      }  else if (packet.comando == 2){                       
+            } else {
+             respostaPacote.comando = 4; // 4 = NÃO
+             std::cout << "Connection denied." << std::endl;
+            }
+
+           sendto(sock, &respostaPacote, sizeof(respostaPacote), 0, (struct sockaddr*)&clientAddr, addrLen);
+
+         continue;
+
+        }  else if(packet.comando ==6){
+                  std::cout << "[NETWORK] O 3DS se desconectou." << std::endl;
+                 continue;
+        }  else if(packet.comando == 2){                       
         
 
         //debug
@@ -233,15 +356,21 @@ int main() {
         int32_t lx = Scale3DSToLinuxAxis(packet.circleX);
         int32_t ly = -Scale3DSToLinuxAxis(packet.circleY); 
         
-        emit_event(uifd, EV_ABS, ABS_X, lx);
-        emit_event(uifd, EV_ABS, ABS_Y, ly);
+        // verifica qual analogico foi escolhido
+        if (to_right == 1) {
+            emit_event(uifd, EV_ABS, ABS_RX, lx);
+            emit_event(uifd, EV_ABS, ABS_RY, ly);
+        } else {
+            emit_event(uifd, EV_ABS, ABS_X, lx);
+            emit_event(uifd, EV_ABS, ABS_Y, ly);
+        }
 
         emit_event(uifd, EV_SYN, SYN_REPORT, 0);
         }
     }
 
     std::cout << "\n=======================" << std::endl;
-    std::cout << "encerrando programa, até!!!!!" << std::endl;
+    std::cout << "shutting down..." << std::endl;
     std::cout << "\n=======================" << std::endl;
 
     ioctl(uifd, UI_DEV_DESTROY);

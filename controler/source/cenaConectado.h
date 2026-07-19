@@ -14,8 +14,9 @@ private:
     C2D_Image imgPen, imgPenOff, imgPlay, imgPause;
 
 	C2D_TextBuf textBuf;
-	C2D_Text voltarText;
-	C2D_Text infoText, statusText;
+	C2D_TextBuf dynamicBuf;
+	C2D_Text PText;
+	C2D_Text infoText, statusText, txtHelpTouchpad;
 	
 	float arrowIncline;
 
@@ -26,7 +27,23 @@ private:
 	bool exibirRetangulo = false;
 	bool drawTouchpad = false;
 	bool processInThisFrame = false;
-	//dinamica do menu
+
+	//popup dynamic
+	C2D_Text msgPopUp, txtYes, txtNo;
+	std::vector<Botao> popUpButtons;
+	int popUpIndex = 1;
+	bool showPopUp;
+
+	placeHolder cPopUp = { 
+		.x = 30.0f,
+		.y = 70.0f,
+		.w = 250.0f,
+		.h = 90.0f,
+		.color = C2D_Color32(240, 240, 240, 255)
+	};
+	//
+
+	//menu dynamic
 	bool painelAberto = false;
 	float painelY = -60.0f;      // Começa fora da tela (ajuste conforme a altura do painel)
 	float painelAlvo = -60.0f;   // Onde o painel quer chegar
@@ -40,6 +57,7 @@ private:
 		.h = 20.0f,
 		.color = C2D_Color32(255, 255, 255, 255)
 	};
+	;;
 
 
 public:
@@ -48,5 +66,7 @@ public:
 	~cenaConectado();
 	int update(const InputPacket& packet) override;
 	void draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) override;
+	bool isBusy() const { return drawTouchpad || showPopUp; }
 	WidgetDesenho* touchpad;
+	std::string textToDeliver;
 };

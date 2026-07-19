@@ -3,6 +3,7 @@
 #include <3ds.h>
 #include "botao.h"
 #include <vector>
+#include <cstdlib>
 #include "painelTopo.h"
 #include "painelRodape.h"
 
@@ -14,7 +15,7 @@ private:
     C2D_Text infoText;
     C2D_Text help;
     C2D_Text botaoTextIP, botaoTextPort, botaoConfirm, ipText, portaText, deadzoneText;
-    C2D_Text seta,invertAxisY, deadzone , emularParaQualStick, swapABandXY, clearTop;//configuraçoes
+    C2D_Text seta,seta2 ,invertAxisY, deadzone , emularParaQualStick, swapABandXY, clearTop;//configuraçoes
     C2D_Text parametersText;
     u32 squareColor, fieldColor;
     std::vector<Botao> botoes;
@@ -24,6 +25,7 @@ private:
 
     std::string ipTemp;
     std::string portaTemp;
+    std::string deadZoneTemp;
 
     PainelTopo* header;
     PainelRodape* rodape;

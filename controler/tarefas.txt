@@ -1,0 +1,15 @@
+coisas a fazer:
+1. OK| botao para abrir o teclado e entao enviar o que foi digitado caso der ok
+2. ao voltar da cenaConectado para a principal exibir um popup perguntando se é para pausar a conexao ou pausar
+3. 
+4. OK|caso o servidor seja fechado no pc exibir uma mensagem e terminar a conexao do 3ds
+5. quando estou com widget desenho aberto, redefinir os comandos dos botoes para backspace, espaço etc
+6. OK|um metodo para caso o servidor nao responda por muito tempo, a conexao ser desfeita de maneira leve, onde basta clicar em um botao para tentar reativar a conexao
+7. 
+
+bugs atuais:
+1. 
+2. 
+3. 
+4. 
+5. 

@@ -1,5 +1,6 @@
 #include "cenaTexto.h"
 #include "saveConfig.h"
+
 const char* altIP = "alterar IP /";
 const char* altPort = "alterar Porta /";
 bool ok = false;
@@ -8,7 +9,9 @@ float xBtnBot = getCenter(SCREEN_WIDTH_BOTTOM, BTN_WIDTH);
 //float xBtnTop = getCenter(SCREEN_WIDTH_TOP, parameterField);
 float escalaTexto = 0.8f;
 
-float deadzoneValue = 0.0f;
+float deadzoneValue = deadZone;
+
+
 
 
 
@@ -26,6 +29,8 @@ cenaTexto::cenaTexto() {
     portaTemp = porta;
     std::string displayParam = ipTemp + ":" + portaTemp;
 
+    
+
     struct { C2D_Text* obj; const char* texto; } textos[] = {
     {&ipText, ipTemp.c_str()},
     {&portaText, portaTemp.c_str()},
@@ -36,12 +41,11 @@ cenaTexto::cenaTexto() {
     {&botaoTextPort,  altPort},
     {&botaoConfirm,   "Ok"},
     {&seta,           ">"},
-    {&help, "?"},
-    {&deadzone, "(ok)"},//DeadZone do \n analogico/
-    {&invertAxisY, "inverter eixo Y /"},
-    {&emularParaQualStick, "Cpad será emulado para qual analogico? /"},
-    {&swapABandXY, "trocar os botoes XY e AB? /"},
-    {&clearTop, "escurecer a tela superior enquanto conectado? /"}
+    {&seta2,           "<"},
+    {&deadzone, "define Deadzone"},//DeadZone do \n analogico/
+    {&invertAxisY, "Invert Y Axis?"},
+    {&swapABandXY, "Swap XY and AB Buttons?"},
+    {&clearTop, "hide top screen while connected?"}
     };
 
     for (const auto& item : textos) {
@@ -102,19 +106,11 @@ cenaTexto::cenaTexto() {
         0.5f, 
         280, 
         BTN_HEIGHT, 
-        new ConteudoTexto(&emularParaQualStick, 0.4, false), 
-        squareColor, 
-        C2D_Color32(200, 200, 200, 255)));
-    pagina1.push_back(Botao(20, 
-        centroY - 15, 
-        0.5f, 
-        280, 
-        BTN_HEIGHT, 
         new ConteudoTexto(&swapABandXY, 0.6, false), 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
     pagina1.push_back(Botao(20, 
-        centroY + 25, 
+        centroY - 15, 
         0.5f, 
         280, 
         BTN_HEIGHT, 
@@ -142,20 +138,11 @@ cenaTexto::cenaTexto() {
         0.5f, 
         10, 
         60, 
-        new ConteudoTexto(&seta), 
+        new ConteudoTexto(&seta2), 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
 
         botoes.push_back(Botao(250, 
-        20, 
-        0.5f, 
-        40, 
-        15, 
-        new ConteudoTexto(&help), 
-        squareColor, 
-        C2D_Color32(200, 200, 200, 255)));
-
-        botoes.push_back(Botao(205, 
         20, 
         0.5f, 
         40, 
@@ -172,105 +159,118 @@ cenaTexto::~cenaTexto() {
     delete rodape;
     delete header;
 }
-// TECLADOS
-std::string cenaTexto::abrirTecladoIP() {
-    SwkbdState swkbd;
-    char buffer[16];
 
-    swkbdInit(&swkbd, SWKBD_TYPE_NUMPAD, 2, 15);
-
-    swkbdSetHintText(&swkbd, "Digite o IP do PC (ex: 192.168.0.10)");
-
-    swkbdSetNumpadKeys(&swkbd, '.', 0);
-
-    SwkbdButton botaoPressionado = swkbdInputText(&swkbd, buffer, sizeof(buffer));
-
-    if (botaoPressionado == SWKBD_BUTTON_RIGHT) {
-        return std::string(buffer);
-    }
-
-    return "";
-}
-std::string cenaTexto::abrirTecladoPorta() {
-    SwkbdState swkbd;
-    char buffer[16];
-
-    swkbdInit(&swkbd, SWKBD_TYPE_NUMPAD, 2, 15);
-
-    swkbdSetHintText(&swkbd, "Porta");
-
-    swkbdSetNumpadKeys(&swkbd, '.', 0);
-
-    SwkbdButton botaoPressionado = swkbdInputText(&swkbd, buffer, sizeof(buffer));
-
-    if (botaoPressionado == SWKBD_BUTTON_RIGHT) {
-        return std::string(buffer);
-    }
-
-    return "";
-}
-//FIM TECLADOS
 
 int cenaTexto::update(const InputPacket& packet) {
-    auto& botoesAtuais = paginasBotoes[paginaAtual];
+    auto& actualButtons = paginasBotoes[paginaAtual];
     if (packet.keysDown & KEY_DDOWN) {
-        botoesAtuais[indiceFoco].selecionado = false;
-        indiceFoco = (indiceFoco + 1 + botoesAtuais.size()) % botoesAtuais.size();
-        botoesAtuais[indiceFoco].selecionado = true;
-    }
-    else if (packet.keysDown & KEY_DUP) {
-        botoesAtuais[indiceFoco].selecionado = false;
-        indiceFoco = (indiceFoco - 1 + botoesAtuais.size()) % botoesAtuais.size();
-        botoesAtuais[indiceFoco].selecionado = true;
+   if (indiceFoco == -1) {
+            botoes[2].selecionado = false; // tira o foco do OK
+            indiceFoco = 0;
+            actualButtons[indiceFoco].selecionado = true;
+        } else {
+            actualButtons[indiceFoco].selecionado = false;
+            indiceFoco++;
+            if (indiceFoco >= (int)actualButtons.size()) {
+                indiceFoco = -1; //  vai pro OK
+                botoes[2].selecionado = true;
+            } else {
+                actualButtons[indiceFoco].selecionado = true;
+            }
+        }
+    }else if (packet.keysDown & KEY_DUP) {
+        if (indiceFoco == -1) {
+            botoes[2].selecionado = false;
+            indiceFoco = actualButtons.size() - 1; // para o último botão 
+            actualButtons[indiceFoco].selecionado = true;
+        } else {
+            actualButtons[indiceFoco].selecionado = false;
+            indiceFoco--;
+            if (indiceFoco < 0) {
+                indiceFoco = -1;  //vai pro OK
+                botoes[2].selecionado = true;
+            } else {
+                actualButtons[indiceFoco].selecionado = true;
+            }
+        }
     }
     else if (packet.keysDown & KEY_DRIGHT) { 
-        botoesAtuais[indiceFoco].selecionado = false;
+        if (indiceFoco != -1) actualButtons[indiceFoco].selecionado = false;
         paginaAtual = 1; 
-        indiceFoco = 0;
-        paginasBotoes[paginaAtual][indiceFoco].selecionado = true;
+        if (indiceFoco != -1) {
+            
+            if (indiceFoco >= (int)paginasBotoes[paginaAtual].size()) {
+                indiceFoco = paginasBotoes[paginaAtual].size() - 1;
+            }
+            paginasBotoes[paginaAtual][indiceFoco].selecionado = true;
+        }
     }
     else if (packet.keysDown & KEY_DLEFT) { 
-        botoesAtuais[indiceFoco].selecionado = false;
+        if (indiceFoco != -1) actualButtons[indiceFoco].selecionado = false;
         paginaAtual = 0; 
-        indiceFoco = 0;
-        paginasBotoes[paginaAtual][indiceFoco].selecionado = true;
+        if (indiceFoco != -1) {
+            if (indiceFoco >= (int)paginasBotoes[paginaAtual].size()) {
+                indiceFoco = paginasBotoes[paginaAtual].size() - 1;
+            }
+            paginasBotoes[paginaAtual][indiceFoco].selecionado = true;
+        }
     }
-
     
     else if (packet.keysDown & KEY_A) {
+
+        if (indiceFoco == -1) { 
+            // OBJETIVO 1: Apertou A com o OK selecionado
+            ipGlobal = ipTemp;
+            porta = portaTemp;
+            if (!deadZoneTemp.empty()) {
+    
+            deadZone = std::atof(deadZoneTemp.c_str()); 
+}
+            salvarConfig();
+            return 3;
+        }
         
         if (paginaAtual == 0) {
             
-            if (indiceFoco == 0) {
-             std::string novoIP = abrirTecladoIP();
-             if (!novoIP.empty()) {
-              ipTemp = novoIP;
+            if (indiceFoco == 0) {//ip
+             std::string newIP = OpenSysKBD( SWKBD_TYPE_NUMPAD, "Digite o IP do PC (ex: 192.168.0.10)", 15);
+             if (!newIP.empty()) {
+              ipTemp = newIP;
               std::string novaExibicao = ipTemp + ":" + portaTemp;
               C2D_TextParse(&parametersText, staticBuf, novaExibicao.c_str());
               C2D_TextOptimize(&parametersText);
              }
             }
 
-            else if (indiceFoco == 1) { std::string novaPorta = abrirTecladoPorta();
+            else if (indiceFoco == 1) { //port
+                std::string newPort = OpenSysKBD( SWKBD_TYPE_NUMPAD, "Digite uma porta entre 1024 e 65535", 15);
 
-             if (!novaPorta.empty()) {
-                portaTemp = novaPorta;
+             if (!newPort.empty()) {
+                portaTemp = newPort;
                 std::string novaExibicao = ipTemp + ":" + portaTemp;
                 C2D_TextParse(&parametersText, staticBuf, novaExibicao.c_str());
-                C2D_TextOptimize(&parametersText); }
-            }
-            else if (indiceFoco == 2) {
-                 ipGlobal = ipTemp;
-                porta = portaTemp;
-                salvarConfig();
-                return 3;
+                C2D_TextOptimize(&parametersText); 
                 }
-            else if (indiceFoco == 3) {
-                 /* algo*/ 
+            }
+            else if (indiceFoco == 2) {//deadzone
+                std::string newDeadZone = OpenSysKBD( SWKBD_TYPE_NUMPAD, "new deadzone here", 15);
+                
+                if (!newDeadZone.empty()) {
+                deadZoneTemp = newDeadZone;
+                C2D_TextParse(&deadzoneText, staticBuf, deadZoneTemp.c_str());
+                C2D_TextOptimize(&deadzoneText); 
+                }
+            }
+            else if (indiceFoco == 3) {//invert y
+                 invertYAxis = !invertYAxis; 
+                 
                 }
         }
         else if (paginaAtual == 1) {
             if (indiceFoco == 0) {
+             swapAB_XY = !swapAB_XY;
+            }
+            else if (indiceFoco == 1) {
              //algo
             }
     }
@@ -282,14 +282,34 @@ int cenaTexto::update(const InputPacket& packet) {
     }
 
     if (packet.keysHeld & KEY_Y) {
-        //aplicar
-		//squareColor = C2D_Color32(0, 255, 0, 255);
+        ipGlobal = ipTemp;
+        porta = portaTemp;
+        if (!deadZoneTemp.empty()) {
+            deadZone = std::atof(deadZoneTemp.c_str()); 
+        }
+        salvarConfig();
+        return 3;
+    }
+
+    if (packet.keysDown & KEY_TOUCH) {
+        if (botoes[2].foiTocado(packet.touchX, packet.touchY)) {
+            ipGlobal = ipTemp;
+            porta = portaTemp;
+            if (!deadZoneTemp.empty()) {
+            deadZone = std::atof(deadZoneTemp.c_str()); 
+            }
+            salvarConfig();
+            return 3;
+        }
     }
  
     return -1;
 }
 
 void cenaTexto::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
+
+    u32 green = C2D_Color32(0, 255, 0, 255);
+    u32 red = C2D_Color32(255, 0, 0, 255);
 
     float larguraInfo, alturaInfo;
     float  alturaPa;
@@ -318,9 +338,14 @@ void cenaTexto::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 
     rodape->draw();
 
-    for (auto& btn : botoes) {
-        btn.draw();
+    if (paginaAtual == 0) {
+        botoes[0].draw(); // seta direita na página 0
+    } else if (paginaAtual == 1) {
+        botoes[1].draw(); // seta esquerda na página 1
     }
+    
+    // O Help e o OK aparecem em todas as páginas
+    botoes[2].draw(); 
 
      for (auto& btn : paginasBotoes[paginaAtual]) {
         btn.draw();
@@ -330,10 +355,20 @@ void cenaTexto::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
         C2D_DrawText(&ipText, C2D_WithColor |  C2D_AlignRight , 288, 55.0f, 0.9f, 0.6f, 0.6f, C2D_Color32(0, 0, 0, 255));
         C2D_DrawText(&portaText, C2D_WithColor|  C2D_AlignRight, 288, 95.0f, 0.9f, 0.6f, 0.6f, C2D_Color32(0, 0, 0, 255));
         C2D_DrawText(&deadzoneText, C2D_WithColor|  C2D_AlignRight, 288, 135.0f, 0.9f, 0.6f, 0.6f, C2D_Color32(0, 0, 0, 255));
-        C2D_DrawRectangle(270, 174.0f, 1.0f, 22.0f, 22.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
+        if(invertYAxis){
+           C2D_DrawRectangle(270, 174.0f, 1.0f, 22.0f, 22.0f, green, green, green, green);//Yaxis
+        } else{
+             C2D_DrawRectangle(270, 174.0f, 1.0f, 22.0f, 22.0f, red, red, red, red);//Yaxis
+        }
+        
     } else if (paginaAtual == 1){
-        C2D_DrawRectangle(270, 134.0f, 1.0f, 22.0f, 22.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
-        C2D_DrawRectangle(270, 94.0f, 1.0f, 22.0f, 22.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
-        C2D_DrawRectangle(270, 54.0f, 1.0f, 22.0f, 22.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
+
+        if(swapAB_XY) {
+            C2D_DrawRectangle(270, 54.0f, 1.0f, 22.0f, 22.0f, green, green, green, green);
+        } else {
+            C2D_DrawRectangle(270, 54.0f, 1.0f, 22.0f, 22.0f, red, red, red, red);
+        }
+        C2D_DrawRectangle(270, 94.0f, 1.0f, 22.0f, 22.0f, red, red, red, red);//clack screen
+        
     }
 }

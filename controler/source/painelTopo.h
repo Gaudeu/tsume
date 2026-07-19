@@ -41,6 +41,7 @@ public:
         u32 corLinha = C2D_Color32(0, 0, 0, 255);
         u32 corVermelho = C2D_Color32(255, 0, 0, 255);
 		u32 corVerde = C2D_Color32(0, 255, 0, 255);
+        u32 corAmarelo = C2D_Color32(255, 255, 0, 255);
         float posX =  30.0f;
         float margemInferior = 5.0f;
         float base = h - margemInferior;
@@ -67,12 +68,11 @@ public:
 
         
 
-        // 3. RETÂNGULO VERMELHO À DIREITA
-        // Posicionado 10 pixels após a última linha possível (18 + 10 = 28)
-        // Usamos x + posX para garantir que ele siga o painel
+        
         if (estadoConexao == 2) {
+             u32 cor = (transmissionPaused || isContextPaused) ? corAmarelo : corVerde;
             C2D_DrawRectangle(x + posX + 28.0f, y + base - 14.0f, 0.5f, 6.0f, 14.0f,
-                corVerde, corVerde, corVerde, corVerde);
+                cor, cor, cor, cor);
         }
         else {
             C2D_DrawRectangle(x + posX + 28.0f, y + base - 14.0f, 0.5f, 6.0f, 14.0f,

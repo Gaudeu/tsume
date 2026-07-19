@@ -21,10 +21,12 @@ NetworkManager::NetworkManager() {
 NetworkManager::~NetworkManager() {                 //destructor
     disconnect();
 }
-
+/*
 void NetworkManager::pauseConnection(){
     
 }
+*/
+
 
 void NetworkManager::disconnect() {
     if (sock >= 0) {
@@ -114,9 +116,44 @@ int NetworkManager::checkConfirmation(){
             isConnected = false;
             statusMessage = "Conexao recusada pelo servidor.";
             return -1; 
+        } else if (pacoteRecebido.comando == 6){
+            statusMessage = "O servidor foi fechado.";
+            isConnected = false;
+
+            return 3;
+
         }
     }
     return 0;
+}
+
+int NetworkManager::checkActiveConnection() {
+    InputPacket pacoteRecebido{};
+    struct sockaddr_in fromAddr;
+    socklen_t fromLen = sizeof(fromAddr);
+
+    int statusRetorno = 0;
+
+    while (recvfrom(sock, &pacoteRecebido, sizeof(pacoteRecebido), 0, (struct sockaddr*)&fromAddr, &fromLen) == sizeof(InputPacket)) {
+        
+        if (pacoteRecebido.comando == 6) { // servidor fechou definitivamente
+            //mensagem de "servidor fechou"
+            disconnect();
+            return 2; 
+        }
+        if (pacoteRecebido.comando == 9) { // PONG recebido
+            timeoutCounter = 0; // 
+            return 1; 
+        }
+    }
+
+    
+    timeoutCounter++;
+    if (timeoutCounter > 360) { 
+        return -1; // Soft Pause
+    }
+
+    return 0; // Tudo normaR
 }
 
 
@@ -125,6 +162,20 @@ void NetworkManager::sendMatrix(const std::vector<uint8_t>& matrix) {
     
     // Envia o array de bytes pela rede (784 bytes)
     sendto(sock, matrix.data(), matrix.size(), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+}
+
+void NetworkManager::sendText(const std::string& text){
+    if (!isConnected || sock < 0 || text.empty()) return;
+
+    TextPacket packet{};
+    packet.comando = 5;
+
+    memset(packet.text, 0, sizeof(packet.text));
+
+    strncpy(packet.text, text.c_str(), sizeof(packet.text) - 1);
+
+    sendto(sock, &packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
 }
 
 void NetworkManager::sendPacket(const InputPacket& packet) {

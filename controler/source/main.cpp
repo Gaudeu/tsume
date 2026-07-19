@@ -12,7 +12,11 @@
 std::string ipGlobal = "127.0.0.1"; // Definição real
 std::string porta = "12345";
 int estadoConexao = 0;//0: desconectado, 1:aguardando confirmacao, 2: conectado
-
+bool transmissionPaused = false;
+bool isContextPaused = false;
+bool swapAB_XY = false;
+int deadZone = 15;
+bool invertYAxis = false;
 
 #define SCREEN_WIDTH 400
 #define SCREEN_HEIGHT 240
@@ -46,8 +50,8 @@ int main() {
 	Cena* cenaAtual = new cenaPrincipal();
 
 	cenaAtual->setStatus(info);
-
-	while (aptMainLoop()) {
+    bool rodando = true;
+	while (aptMainLoop() && rodando) {
 		InputPacket packet = input.scan();
 		if (packet.keysDown & KEY_START) break;
 		//network.sendPacket(packet);
@@ -55,60 +59,117 @@ int main() {
 		int nextEstate = cenaAtual? cenaAtual->update(packet): -1;
 
 		if (nextEstate != -1) {
-			Cena* proximaCena = nullptr;
-
-			if (nextEstate == 10){
-				//enviar a matriz
-				cenaConectado* cenaC = dynamic_cast<cenaConectado*>(cenaAtual);
+			switch (nextEstate){
+				case 10: {
+					cenaConectado* cenaC = dynamic_cast<cenaConectado*>(cenaAtual);
 				if(cenaC){
 					std::vector<uint8_t> matrixData = cenaC->touchpad->extractNormalized(40);
 
 					network.sendMatrix(matrixData);
 				}
-					nextEstate = -1;
-
-			} else if (nextEstate == 11) {
-				//network.pauseConnection()
-			} else if (nextEstate == 0) {
-				
-				bool sucesso = network.connectToServer(ipGlobal, std::stoi(porta));//true = socket conectado ou false = erro
-				if(sucesso){
-                  cenaAtual->setStatus(network.getStatusMessage());
-				  estadoConexao = 1;
-                  
-				} else {
-                  cenaAtual->setStatus(info);
-				  estadoConexao = 0;
-                  
+				break;
 				}
-				
-			}
-			else {
-				
-				delete cenaAtual;
+
+				case 11:
+				 if (transmissionPaused) {
+                 
+                 InputPacket ping{};
+                 ping.comando = 8;
+                  network.sendPacket(ping);
+        
+                 if (auto cenaC = dynamic_cast<cenaConectado*>(cenaAtual)) {
+                   cenaC->setStatus("Testando conexão com o PC...");
+                  }   
+                  network.resetTimeout(); // Dá mais 3 segundos para o PC responder
+                } else {
+                   transmissionPaused = true;
+                   if (auto cenaC = dynamic_cast<cenaConectado*>(cenaAtual)) {
+                   cenaC->setStatus("Transmissão Pausada.");
+                   }
+                }
+                break;
+
+				case 12:{
+					cenaConectado* cenaC = dynamic_cast<cenaConectado*>(cenaAtual);
+                 if (cenaC) {
+                    network.sendText(cenaC->textToDeliver); 
+                 }
+                 break;
+				}
+
+				case 0: {
+                bool sucesso = network.connectToServer(ipGlobal, std::stoi(porta));
+                if (sucesso) {
+                    cenaAtual->setStatus(network.getStatusMessage());
+                    estadoConexao = 1;
+                } else {
+                    cenaAtual->setStatus(info);
+                    estadoConexao = 0;
+                }
+                break;
+            }
+
+            case 2:
+                delete cenaAtual;
+                cenaAtual = nullptr;
+                rodando = false; // sinaliza para o while encerrar no próximo frame
+                break;
+
+            case 1:
+                delete cenaAtual;
 				cenaAtual = nullptr;
-				if (nextEstate == 2) { break; };
+                cenaAtual = new cenaTexto();
+                break;
 
-				if (nextEstate == 1) {
-					cenaAtual = new cenaTexto();
-				}
-				else if (nextEstate == 3) { // Supondo que 3 volta da cenaTexto
-					cenaAtual = new cenaPrincipal();
-				}
+            case 3:
+			if(estadoConexao == 2){
+				InputPacket aviso{};
+				aviso.comando = 6;
+				network.sendPacket(aviso);
 
+			}
+                delete cenaAtual;
+				cenaAtual = nullptr;
+                cenaAtual = new cenaPrincipal();
+                estadoConexao = 0;
+				transmissionPaused = false;
+                break;
+                
+            default:
+                break;
 			}
 
 		}
 
 		if (estadoConexao == 1) {
 			int status = network.checkConfirmation();
-            if (status==1) {
+
+			if (status==1) {
                 estadoConexao = 2;
                 
 				
 				delete cenaAtual;
 				cenaAtual = new cenaConectado();
-				cenaAtual->setStatus("IP: " + ipGlobal + "\nPORTA: " + porta);
+				//cenaAtual->setStatus("IP: " + ipGlobal + "\nPORTA: " + porta);
+
+                 
+            } else if (status == -1) {
+                estadoConexao = 0;
+                
+                cenaAtual->setStatus(network.getStatusMessage());
+            }
+			/*
+            delete cenaAtual; //essas
+			cenaAtual = new cenaConectado();
+			estadoConexao = 2; //substituir essas linhas pelo bloco comentado apos o debug
+
+			if (status==1) {
+                estadoConexao = 2;
+                
+				
+				delete cenaAtual;
+				cenaAtual = new cenaConectado();
+				//cenaAtual->setStatus("IP: " + ipGlobal + "\nPORTA: " + porta);
 
                  
           } else if (status == -1) {
@@ -116,11 +177,56 @@ int main() {
                 
                 cenaAtual->setStatus(network.getStatusMessage());
             }
+			*/
+			
+            
         }
 
 		if (estadoConexao == 2) {
-			packet.comando = 2;
-			network.sendPacket(packet);
+			int status = network.checkActiveConnection();
+			if (status == 2) { 
+				//servidor fechou (comando 6)
+             delete cenaAtual;
+             cenaAtual = new cenaPrincipal();
+			 cenaAtual->setStatus("O servidor foi fechado.");
+             estadoConexao = 0;
+             transmissionPaused = false;
+			 
+            } else if ( status == -1 && !transmissionPaused){
+				transmissionPaused = true;
+
+				if (auto cenaC = dynamic_cast<cenaConectado*>(cenaAtual)) {
+                  cenaC->setStatus("PC não responde. Transmissão pausada.");
+				}
+
+			} else if(status == 1 && transmissionPaused){
+               transmissionPaused = false;
+                if (auto cenaC = dynamic_cast<cenaConectado*>(cenaAtual)) {
+                 cenaC->setStatus("Conectado e Transmitindo!");
+                }
+			}
+			isContextPaused = false;
+			if (auto cenaC = dynamic_cast<cenaConectado*>(cenaAtual)) {
+				isContextPaused = cenaC->isBusy();
+            }
+               if(!transmissionPaused){
+				 static int frameCount = 0;
+			        if (++frameCount >= 120) {
+                     frameCount = 0;
+                     InputPacket ping{};
+                     ping.comando = 8;
+                     network.sendPacket(ping);
+                }
+			  }
+			 
+
+			if (!transmissionPaused &&  !isContextPaused){
+              packet.comando = 2;
+			  network.sendPacket(packet);
+
+			  
+			}
+			
 		}
 
 		// Desenha a imagem se ela existir

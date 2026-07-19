@@ -26,7 +26,23 @@ class WidgetDesenho: public Widget
   bool contemPonto(float tx, float ty){
      return(tx >= x && tx <= x + w && ty >= y && ty <= y + h);
   }
+   
+  bool forceSend(){
+  if (rastro.empty()) return false;
+      rastroCopy = rastro;
+      limpar();
+      return true;
+  }
 
+  void undo(){
+   if (rastro.empty()) return;
+      while (!rastro.empty()) {
+          bool eraInicio = rastro.back().iniciaNovoTraco;
+          rastro.pop_back();
+          if (eraInicio) break;
+      }
+      inativity = 0;
+  }
   bool update(const InputPacket& packet) {
 
     if (packet.keysHeld & KEY_TOUCH){
