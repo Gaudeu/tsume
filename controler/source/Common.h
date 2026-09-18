@@ -1,4 +1,6 @@
-
+/*
+ * some common objects and variables for general usage.
+*/
 #pragma once
 #include <3ds.h>
 #include <string>

@@ -1,3 +1,8 @@
+/*
+ * Fundamental base class for visual elements and graphical interface components
+ * - Stores spatial properties (x, y, z, width, height, radius) and color/focus states
+ * - Supports drawing 2D geometric primitives (rectangles and circles) integrated with Citro2D
+ */
 #pragma once
 #include <citro2d.h>
 #include <string>

@@ -1,8 +1,14 @@
+/*
+ * Configuration screen for network parameters and control preferences
+ * - Paged interface supporting navigation via physical buttons and touchscreen
+ * - Allows editing IP/Port and analog stick deadzone, and toggling options (invert Y, swap A/B and X/Y)
+ * - Direct integration with the native virtual keyboard (Swkbd) and persistence via 'salvarConfig()'
+ */
 #include "cenaTexto.h"
 #include "saveConfig.h"
 
-const char* altIP = "alterar IP /";
-const char* altPort = "alterar Porta /";
+const char* altIP = "define IP /";
+const char* altPort = "define Porta /";
 bool ok = false;
 float parameterField = 190.0f;
 float xBtnBot = getCenter(SCREEN_WIDTH_BOTTOM, BTN_WIDTH);
@@ -17,7 +23,7 @@ float deadzoneValue = deadZone;
 
 cenaTexto::cenaTexto() {
     header = new PainelTopo(25.0f);
-    rodape = new PainelRodape("A: selecionar  B: Voltar  Y: salvar");
+    rodape = new PainelRodape("A: selecionar  B: Voltar  Y: save and exit");
 
     char buffer[10];
     snprintf(buffer, sizeof(buffer), "%.1f", deadzoneValue);
@@ -52,7 +58,17 @@ cenaTexto::cenaTexto() {
     C2D_TextParse(item.obj, staticBuf, item.texto);
     C2D_TextOptimize(item.obj);
     }
+    
+    conteudoBotao* cIP = new ConteudoTexto(&botaoTextIP, 0.6, false);
+    conteudoBotao* cPort = new ConteudoTexto(&botaoTextPort, 0.6, false);
+    conteudoBotao* cDead = new ConteudoTexto(&deadzone, 0.6, false);
+    conteudoBotao* cInvY = new ConteudoTexto(&invertAxisY, 0.6, false);
 
+    conteudos.push_back(cIP);
+    conteudos.push_back(cPort);
+    conteudos.push_back(cDead);
+    conteudos.push_back(cInvY);
+    
 
 	squareColor = C2D_Color32(255, 255, 255, 255); 
     fieldColor = C2D_Color32(240, 240, 240, 255);
@@ -68,7 +84,7 @@ cenaTexto::cenaTexto() {
         0.5f, 
         280, 
         BTN_HEIGHT, 
-        new ConteudoTexto(&botaoTextIP, 0.6, false), 
+        cIP, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
     pagina0.push_back(Botao(20, 
@@ -76,7 +92,7 @@ cenaTexto::cenaTexto() {
         0.5f, 
         280, 
         BTN_HEIGHT, 
-        new ConteudoTexto(&botaoTextPort, 0.6, false), 
+        cPort, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
     pagina0.push_back(Botao(20, 
@@ -84,7 +100,7 @@ cenaTexto::cenaTexto() {
         0.5f, 
         280, 
         BTN_HEIGHT, 
-        new ConteudoTexto(&deadzone, 0.6, false), 
+        cDead, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
 
@@ -93,11 +109,18 @@ cenaTexto::cenaTexto() {
         0.5f, 
         280, 
         BTN_HEIGHT, 
-        new ConteudoTexto(&invertAxisY, 0.6, false), 
+        cInvY, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255))); 
 
     //
+
+    conteudoBotao* cSwap = new ConteudoTexto(&swapABandXY, 0.6, false);
+    conteudoBotao* cClear = new ConteudoTexto(&clearTop, 0.4, false);
+
+    conteudos.push_back(cSwap);
+    conteudos.push_back(cClear);
+
     //pagina 1
         
     std::vector<Botao> pagina1;
@@ -106,7 +129,7 @@ cenaTexto::cenaTexto() {
         0.5f, 
         280, 
         BTN_HEIGHT, 
-        new ConteudoTexto(&swapABandXY, 0.6, false), 
+        cSwap, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
     pagina1.push_back(Botao(20, 
@@ -114,7 +137,7 @@ cenaTexto::cenaTexto() {
         0.5f, 
         280, 
         BTN_HEIGHT, 
-        new ConteudoTexto(&clearTop, 0.4, false), 
+        cClear, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
     
@@ -123,13 +146,21 @@ cenaTexto::cenaTexto() {
     paginasBotoes.push_back(pagina0);
     paginasBotoes.push_back(pagina1);
 
+    conteudoBotao* cSeta = new ConteudoTexto(&seta);
+    conteudoBotao* cSeta2 = new ConteudoTexto(&seta2);
+    conteudoBotao* cConfirm = new ConteudoTexto(&botaoConfirm);
+
+    conteudos.push_back(cSeta);
+    conteudos.push_back(cSeta2);
+    conteudos.push_back(cConfirm);
+
     //botoes de avulsos
     botoes.push_back(Botao(310, 
         centroY - 30, 
         0.5f, 
         10, 
         60, 
-        new ConteudoTexto(&seta), 
+        cSeta, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
     
@@ -138,7 +169,7 @@ cenaTexto::cenaTexto() {
         0.5f, 
         10, 
         60, 
-        new ConteudoTexto(&seta2), 
+        cSeta2, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
 
@@ -147,7 +178,7 @@ cenaTexto::cenaTexto() {
         0.5f, 
         40, 
         15, 
-        new ConteudoTexto(&botaoConfirm), 
+        cConfirm, 
         squareColor, 
         C2D_Color32(200, 200, 200, 255)));
     //
@@ -155,9 +186,14 @@ cenaTexto::cenaTexto() {
 }
 
 cenaTexto::~cenaTexto() {
+    for (auto cont : conteudos) {
+        delete cont;
+    }
+    conteudos.clear();
     C2D_TextBufDelete(staticBuf);
     delete rodape;
     delete header;
+
 }
 
 

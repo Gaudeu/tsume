@@ -1,5 +1,5 @@
 #include "saveConfig.h"
-#include "Common.h" // Necessário para acessar ipGlobal e porta
+#include "Common.h"
 #include <fstream>
 #include <string>
 

@@ -1,3 +1,8 @@
+/*
+ * a simple header to be shown in the scenes
+ * read directly the system services (network abttery and connection)
+ */
+
 #pragma once
 #include "painel.h"
 #include "WidgetBateria.h"

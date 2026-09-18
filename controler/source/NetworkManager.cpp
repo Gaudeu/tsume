@@ -1,5 +1,7 @@
-//arrumar uma maneira de quando eu conecto pelo 3ds ele envia um pedido
-//de conexao e aguarda o pc confirmar para entao comecar a transmitir os packets
+/*
+ * manage the network messagens (via UDP) using the socket library from the 3ds (soc:u)
+ * initialize and finish the network subsystem (using)
+*/
 #include "NetworkManager.h"
 #include <malloc.h>
 #include <string.h>
@@ -14,7 +16,7 @@ NetworkManager::NetworkManager() {
     sock = -1;
     soc_buffer = nullptr;
     isConnected = false;
-    statusMessage = "Aguardando conexão...";
+    statusMessage = "waiting for the server...";
    
 }
 
@@ -46,13 +48,13 @@ bool NetworkManager::connectToServer(const std::string& ip, int port) {
     disconnect();
     soc_buffer = (uint32_t*)memalign(0x1000, 0x100000);
     if (!soc_buffer) {
-        statusMessage = "Erro: sem memoria para soc_buffer - sample";
+        statusMessage = "Error: out of memory";
         return false;
     }
 
     Result ret = socInit(soc_buffer, 0x100000);
     if (R_FAILED(ret)) {
-        statusMessage = "Erro no socInit. O WiFi do 3DS esta ligado? - Sample";
+        statusMessage = "socInit Error. Wifi is ON?";
         free(soc_buffer);
         soc_buffer = nullptr;
         return false;
@@ -61,7 +63,7 @@ bool NetworkManager::connectToServer(const std::string& ip, int port) {
     //criar socket
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
-        statusMessage = "Erro: Falha ao criar o socket UDP";
+        statusMessage = "Error: socket failed";
         socExit();
         free(soc_buffer);
         soc_buffer = nullptr;
@@ -84,7 +86,7 @@ bool NetworkManager::connectToServer(const std::string& ip, int port) {
 
     isConnected = false;
     tempoEspera = 0;
-    statusMessage = "Aguardando confirmação do servidor...";
+    statusMessage = "Waiting for the server...";
 
     //isConnected = true;
     //statusMessage = "Rede pronta! Mirando em " + ip + ":" + std::to_string(port);
@@ -96,7 +98,7 @@ int NetworkManager::checkConfirmation(){
     tempoEspera++;
     if (tempoEspera > 900) {
         isConnected = false;
-        statusMessage = "Conexao falhou (Tempo Esgotado). Tente novamente.";
+        statusMessage = "Connection failed (Timeout). Try again \n Make sure you have the server running on your PC. ";
         return -1; // Retornamos -1 para indicar Timeout/Falha
     }
 

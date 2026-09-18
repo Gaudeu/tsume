@@ -19,13 +19,14 @@ private:
     C2D_Text statusText, conectarText, editarText, sairText;
 	C2D_Text ipText, portaText, simpleColon;
     C2D_Text msgPopUp, txtSim, txtNao;
-    std::string statusConexao = "Aguardando conexão...";
+    std::string statusConexao = "Waiting for the server...";
     u32 btnColor, corTexto;
     //float btnWidth, btnHeight;
 	float centroX, centroY;
     std::vector<Botao> botoes;
     int indiceFoco = 0;
     std::vector<Botao> botoesPopUp;
+    std::vector<conteudoBotao*> conteudos;
     int indiceFocoPopUp = 0;
     bool exibirPopUp = false;
 

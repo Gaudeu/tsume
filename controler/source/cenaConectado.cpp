@@ -1,3 +1,11 @@
+//some components of the char button are named ending in pen (it was other button before)
+/*
+ * Active scene for control transmission and interaction during the connected session.
+ * - Displays transmission status and network information on the top screen.
+ * - Manages an animated sliding panel (smooth interpolation) with shortcuts on the bottom screen.
+ * - Supports triggering the virtual keyboard for text input and sending pause commands.
+ * - Controls the confirmation modal (pop-up) for safe session disconnection.
+ */
 #include "cenaConectado.h"
 
 inline void interpolar(float& curr, float target, float v, float lim = 0.01f) {
@@ -13,14 +21,21 @@ cenaConectado::cenaConectado() {
 	textBuf = C2D_TextBufNew(4096);
 	dynamicBuf = C2D_TextBufNew(1024);
 
-	C2D_TextParse(&msgPopUp, textBuf, "Doing this will end the session \n are you sure?");
+	
+    showPopUp = false;
+    painelAberto = false;
+    arrowIncline = 0.0f;
+    popUpIndex = 1; 
+    
+
+	C2D_TextParse(&msgPopUp, textBuf, "This will end the session \n are you sure?");
 	C2D_TextParse(&txtYes, textBuf, "Yes");
 	C2D_TextParse(&txtNo, textBuf, "No");
-	C2D_TextParse(&txtHelpTouchpad, textBuf, "A:Send  B:Close  X:Undo  Y:Clear");
+	//C2D_TextParse(&txtHelpTouchpad, textBuf, "A:Send  B:Close  X:Undo  Y:Clear");
 	C2D_TextOptimize(&msgPopUp);
 	C2D_TextOptimize(&txtYes);
 	C2D_TextOptimize(&txtNo);
-	C2D_TextOptimize(&txtHelpTouchpad);
+	//C2D_TextOptimize(&txtHelpTouchpad);
 
 	spriteSheetPen = C2D_SpriteSheetLoad("romfs:/gfx/Bsprite.t3x");
 	imgPen = C2D_SpriteSheetGetImage(spriteSheetPen, 0);
@@ -34,12 +49,15 @@ cenaConectado::cenaConectado() {
 	spriteSheetPause = C2D_SpriteSheetLoad("romfs:/gfx/Esprite.t3x");
 	imgPause = C2D_SpriteSheetGetImage(spriteSheetPause, 0);
 
+	spriteSheetReturn = C2D_SpriteSheetLoad("romfs:/gfx/Fsprite.t3x");
+	imgReturn = C2D_SpriteSheetGetImage(spriteSheetReturn, 0);
+
 
 	
 
     //conteudo botoes
-	conteudoBotao* conteudoBotaoPen = new ConteudoImagem(&imgPen, &imgPenOff);
-    conteudosBotoes.push_back(conteudoBotaoPen);
+	conteudoBotao* conteudoBotaoChar = new ConteudoImagem(&imgPen, &imgPenOff);
+    conteudosBotoes.push_back(conteudoBotaoChar);
 
 	conteudoBotao* conteudoBotaoPlay = new ConteudoImagem(&imgPlay, &imgPause);
     conteudosBotoes.push_back(conteudoBotaoPlay);
@@ -54,7 +72,7 @@ cenaConectado::cenaConectado() {
 	float btnPopUpHeight = 30.0f;
 
 
-	setStatus("Conectado");
+	setStatus(" ");
 
 	float btnWidth = 120.0f;
 	float btnHeight = 40.0f;
@@ -128,33 +146,28 @@ cenaConectado::cenaConectado() {
 		0.9f,
 	    20.0f,
 		18.0f, 
-		conteudoBotaoPen, 
+		conteudoBotaoChar, 
 		C2D_Color32(0, 0, 255, 255), 
-		C2D_Color32(0, 0, 0, 255))); //exibir touch pad (indice 3)
+		C2D_Color32(0, 0, 0, 255))); //exibir teclado (indice 3)
 
-		botoesC.push_back(new Botao(
-		sControl.x + 46.0f,
-		-18.0f,
-		0.9f,
-	    20.0f,
-		18.0f, 
-		nullptr, 
-		C2D_Color32(0, 0, 255, 255), 
-		C2D_Color32(0, 0, 0, 255))); //exibir teclado (indice 4)
 
+	/*
+	
 	touchpad = new WidgetDesenho(
 		10.0f, 80.0f, 0.5f,
 		300.0f, 130.0f,
 		C2D_Color32(200, 200, 200, 255),
 		C2D_Color32(0, 0, 0, 255)
 	);
+	
+	*/
 }
 
 cenaConectado::~cenaConectado() {
 	C2D_TextBufDelete(textBuf);
 	C2D_TextBufDelete(dynamicBuf);
 	delete header;
-	delete touchpad;
+	//delete touchpad;
 
 	for (auto btn : botoesC) {
         delete btn;
@@ -163,11 +176,13 @@ cenaConectado::~cenaConectado() {
 	for (auto cont : conteudosBotoes) {
         delete cont;
     }
+	conteudosBotoes.clear();
 
 	C2D_SpriteSheetFree(spriteSheetPen);
     C2D_SpriteSheetFree(spriteSheetPenOff);
 	C2D_SpriteSheetFree(spriteSheetPlay);   
     C2D_SpriteSheetFree(spriteSheetPause);
+	C2D_SpriteSheetFree(spriteSheetReturn);
 }
 
 void cenaConectado::setStatus(std::string msg) {
@@ -204,7 +219,15 @@ int cenaConectado::update(const InputPacket& packet) {
 		}
 
 		if (packet.keysDown & KEY_TOUCH) {
-			if (popUpButtons[0].foiTocado(packet.touchX, packet.touchY)) return 3;
+			if (popUpButtons[0].foiTocado(packet.touchX, packet.touchY)) {
+
+				if(painelAberto){
+					painelAberto = !painelAberto;
+					return 3;
+				} else {
+					return 3;
+				}
+			}
 			if (popUpButtons[1].foiTocado(packet.touchX, packet.touchY)) showPopUp = false;
 		}
 
@@ -215,9 +238,13 @@ int cenaConectado::update(const InputPacket& packet) {
 
 		return -1;
 	}
-    //
+    
 
-	//widgetdesenho dinamica
+	
+	/*
+	
+	widgetdesenho dinamica
+
 	if (drawTouchpad && touchpad != nullptr) {
 		
 		
@@ -265,7 +292,9 @@ int cenaConectado::update(const InputPacket& packet) {
 
 		return -1; 
 	}
-    //
+
+	*/
+	
 
 	if (packet.keysDown & KEY_TOUCH) {
 		if (botoesC[0]->foiTocado(packet.touchX, packet.touchY)) {
@@ -285,15 +314,18 @@ int cenaConectado::update(const InputPacket& packet) {
         botoesC[2]->aoClicar(); 
         return 11;
         }
+		/*
+		
 		if (botoesC[3]->foiTocado(packet.touchX, packet.touchY)) {
         
 		botoesC[3]->aoClicar();
 		drawTouchpad = !drawTouchpad;
         }
-		if (botoesC[4]->foiTocado(packet.touchX, packet.touchY)) {
+		*/
+		if (botoesC[3]->foiTocado(packet.touchX, packet.touchY)) {
         
-		botoesC[4]->aoClicar();
-		drawTouchpad = !drawTouchpad;
+		//botoesC[3]->aoClicar();
+		//drawTouchpad = !drawTouchpad;
 
 		std::string textTyped = OpenSysKBD(SWKBD_TYPE_NORMAL, "...");
 
@@ -323,11 +355,13 @@ int cenaConectado::update(const InputPacket& packet) {
 			processInThisFrame = true;
 		}
 	}
-	*/
+
 	if(processInThisFrame){
 		processInThisFrame = false;
 		return 10;
 	}
+	*/
+	
 
 	
 	interpolar(painelY, painelAlvo, velocidade, 0.1f);
@@ -403,10 +437,14 @@ void cenaConectado::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 		C2D_ViewRestore(&Matrix);
 	}
 
+	/*
+	
 	if (drawTouchpad && touchpad != nullptr ){
 		touchpad -> draw();
 		C2D_DrawText(&txtHelpTouchpad, C2D_WithColor, 19.0f, 222.0f, 0.5f, 0.55f, 0.55f, C2D_Color32(0, 0, 0, 255));
 	}
+	
+	*/
 
 
 
@@ -422,6 +460,8 @@ void cenaConectado::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 		for (auto& btnPop : popUpButtons) {
 			btnPop.draw();
 		}
-	}//====================FALTA PAUSAR A EMULAÇAO QUANDO O POPUP APARECER====================
+	}
+
+	C2D_DrawImageAt(imgReturn, 0.0f, 220.0f, 1.0f, NULL, 1.2f, 1.2f);
 }
 

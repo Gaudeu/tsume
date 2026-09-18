@@ -1,3 +1,9 @@
+/*
+ * Specialized widget for interface buttons and clickable areas
+ * - Supports rectangular and circular shapes with touchscreen detection
+ * - Encapsulates a 'conteudoBotao*' element for flexible rendering
+ * - Manages visual focus transitions and event dispatching via 'aoClicar()'
+ */
 #pragma once
 
 #include "Widget.h"

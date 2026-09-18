@@ -1,3 +1,9 @@
+/*
+ * polymorphic structure used to the content of the buttons
+ *allows different elements to be shown, such as texts, images. calculating dimensions and positioning
+*/
+
+
 #pragma once
 #include <citro2d.h> 
 

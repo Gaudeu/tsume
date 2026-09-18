@@ -4,19 +4,19 @@
 #include "botao.h"
 #include <vector>
 #include "painelTopo.h"
-#include "WidgetDesenho.h"
+//#include "WidgetDesenho.h"
 
 class cenaConectado : public Cena {
 private:
 	PainelTopo* header;
     
-	C2D_SpriteSheet spriteSheetPen, spriteSheetPenOff, spriteSheetPlay, spriteSheetPause;
-    C2D_Image imgPen, imgPenOff, imgPlay, imgPause;
+	C2D_SpriteSheet spriteSheetPen, spriteSheetPenOff, spriteSheetPlay, spriteSheetPause, spriteSheetReturn;
+    C2D_Image imgPen, imgPenOff, imgPlay, imgPause, imgReturn;
 
 	C2D_TextBuf textBuf;
 	C2D_TextBuf dynamicBuf;
 	C2D_Text PText;
-	C2D_Text infoText, statusText, txtHelpTouchpad;
+	C2D_Text infoText, statusText;
 	
 	float arrowIncline;
 
@@ -25,8 +25,8 @@ private:
 	std::vector<conteudoBotao*> conteudosBotoes;
 
 	bool exibirRetangulo = false;
-	bool drawTouchpad = false;
-	bool processInThisFrame = false;
+	//bool drawTouchpad = false;
+	//bool processInThisFrame = false;
 
 	//popup dynamic
 	C2D_Text msgPopUp, txtYes, txtNo;
@@ -45,15 +45,15 @@ private:
 
 	//menu dynamic
 	bool painelAberto = false;
-	float painelY = -60.0f;      // Começa fora da tela (ajuste conforme a altura do painel)
-	float painelAlvo = -60.0f;   // Onde o painel quer chegar
+	float painelY = -60.0f;     
+	float painelAlvo = -60.0f;   
 	float alturaPainel = 60.0f;  
 	float velocidade = 0.15f;
 
 	placeHolder sControl = { 
 		.x = 200.0f,
 		.y = -18.0f,
-		.w = 90.0f,
+		.w = 43.0f,
 		.h = 20.0f,
 		.color = C2D_Color32(255, 255, 255, 255)
 	};
@@ -66,7 +66,7 @@ public:
 	~cenaConectado();
 	int update(const InputPacket& packet) override;
 	void draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) override;
-	bool isBusy() const { return drawTouchpad || showPopUp; }
-	WidgetDesenho* touchpad;
+	bool isBusy() const { return showPopUp; }
+	//WidgetDesenho* touchpad;
 	std::string textToDeliver;
 };

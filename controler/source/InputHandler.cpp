@@ -1,3 +1,10 @@
+/**
+ * source code designed to map and processing of control signals of the console
+ *  - read the state of buttons, circlePad and touchscreen (HID)
+ *  - handles hardware resources: deadzone, inverion of buttons etc
+ *  - packages the processed data into 'inputPackets' structure
+ */
+
 #include "InputHandler.h"
 #include "Common.h"
 #include <cmath>

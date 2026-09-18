@@ -1,6 +1,18 @@
+/*
+
+ *this is the code assigned to the 1°st page that is shown when you open the app.
+
+ *there is 3 simple buttons on the bottom screen that you can navigate using UP and Down keys.
+ *The navigation works as a index loop, whe you click UP or DOWN the index is increased ou deceased until the max value is reached, when reached the index goes to the opposite side.
+ *render ip por and connection status on top screen
+ 
+
+*/
+
+
 #include "cenaPrincipal.h"
 
-std::string statusConexao = "Aguardando conexão...";
+std::string statusConexao = "Waiting for teh server...";
 
 
 enum botoesMenu {
@@ -13,8 +25,8 @@ cenaPrincipal::cenaPrincipal() {
     header = new PainelTopo(25.0f);
     rodape = new PainelRodape();
 
-    spriteSheet = C2D_SpriteSheetLoad("romfs:/gfx/Asprite.t3x");
-    imagem = C2D_SpriteSheetGetImage(spriteSheet, 0);
+    //spriteSheet = C2D_SpriteSheetLoad("romfs:/gfx/Asprite.t3x");
+    //imagem = C2D_SpriteSheetGetImage(spriteSheet, 0);
     
     textBuf = C2D_TextBufNew(4096);
     dynamicBuf = C2D_TextBufNew(1024);
@@ -22,13 +34,13 @@ cenaPrincipal::cenaPrincipal() {
     C2D_TextParse(&statusText, textBuf, statusConexao.c_str());
     C2D_TextParse(&conectarText, textBuf, "Connect");
     C2D_TextParse(&editarText, textBuf, "Edit");
-    C2D_TextParse(&sairText, textBuf, "Sair");
+    C2D_TextParse(&sairText, textBuf, "Exit");
     C2D_TextParse(&ipText, textBuf, ipGlobal.c_str());
     C2D_TextParse(&portaText, textBuf, porta.c_str());
     C2D_TextParse(&simpleColon, textBuf, ":");
-     C2D_TextParse(&msgPopUp, textBuf, "this will close the app?");
+     C2D_TextParse(&msgPopUp, textBuf, "this will close the app");
     C2D_TextParse(&txtSim, textBuf, "Ok");
-    C2D_TextParse(&txtNao, textBuf, "Calcel");
+    C2D_TextParse(&txtNao, textBuf, "Cancel");
     C2D_TextOptimize(&simpleColon);
     C2D_TextOptimize(&portaText);
     C2D_TextOptimize(&ipText);
@@ -46,6 +58,12 @@ cenaPrincipal::cenaPrincipal() {
     conteudoBotao* txtBtnsair = new ConteudoTexto(&sairText);
     conteudoBotao* txtBtnSim = new ConteudoTexto(&txtSim);
     conteudoBotao* txtBtnNao = new ConteudoTexto(&txtNao);
+
+    conteudos.push_back(txtBtnConectar);
+    conteudos.push_back(txtBtnEdit);
+    conteudos.push_back(txtBtnsair);
+    conteudos.push_back(txtBtnSim);
+    conteudos.push_back(txtBtnNao);
 
 
     btnColor = C2D_Color32(235, 235, 235, 255);
@@ -90,17 +108,6 @@ cenaPrincipal::cenaPrincipal() {
         btnColor, 
         C2D_Color32(200, 200, 200, 255)));
 
-    botoes.push_back(Botao(
-		0.0f, 
-		235.0f, 
-		0.7f,
-		0.0f, 
-		0.0f, 
-		nullptr, 
-		C2D_Color32(255, 0, 0, 255), 
-		C2D_Color32(100, 100, 100, 255), 
-		20.0f, 
-		true));
 
     botoes[0].selecionado = true;
 
@@ -130,7 +137,11 @@ cenaPrincipal::cenaPrincipal() {
 }
 
 cenaPrincipal::~cenaPrincipal() {
-    C2D_SpriteSheetFree(spriteSheet);
+    for (auto cont : conteudos) {
+        delete cont;
+    }
+    conteudos.clear();
+    //C2D_SpriteSheetFree(spriteSheet);
     C2D_TextBufDelete(textBuf);
     C2D_TextBufDelete(dynamicBuf);
     delete rodape;
@@ -182,7 +193,7 @@ int cenaPrincipal::update(const InputPacket& packet) {
         return -1; 
     }
 
-    int numBotoesNavegaveis = botoes.size() - 1;
+    int numBotoesNavegaveis = botoes.size();
 
     if (packet.keysDown & KEY_DDOWN) {
         botoes[indiceFoco].selecionado = false;
@@ -215,30 +226,30 @@ int cenaPrincipal::update(const InputPacket& packet) {
 void cenaPrincipal::draw(C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
     // TELA SUPERIOR 
     float escalaTexto = 0.6f;
-    float meio140 = (SCREEN_WIDTH_TOP / 2.0f) - (65);// 65 � metade da largura do container
+    float meio140 = (SCREEN_WIDTH_TOP / 2.0f) - (65);
     float meio120 = (SCREEN_WIDTH_TOP / 2.0f) - (60);
     float ipX = 145.0f;         // meio do container + um pequeno padding
-    float ipY = 105.0f;         // Ajustado para dentro do ret�ngulo
+    float ipY = 105.0f;         
     C2D_SceneBegin(top);
-    C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
+    C2D_TargetClear(top, C2D_Color32(100, 100, 100, 255));
  
-    C2D_DrawImageAt(imagem, 40.0f, 0, 0.3f, NULL, 1.0f, 1.0f);
+    //C2D_DrawImageAt(imagem, 40.0f, 0, 0.3f, NULL, 1.0f, 1.0f);
     
 	
-    C2D_DrawRectangle(meio140, 95.0f, 0.8f, 160.0f, 40.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
-    C2D_DrawRectangle(meio120, 100.0f, 0.9f, 150.0f, 30.0f, btnColor, btnColor, btnColor, btnColor);
+    C2D_DrawRectangle(meio140 - 5, 95.0f, 0.8f, 150.0f, 40.0f, C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255), C2D_Color32(0, 0, 0, 255));
+    C2D_DrawRectangle(meio120 - 5, 100.0f, 0.9f, 140.0f, 30.0f, btnColor, btnColor, btnColor, btnColor);
 
     float larguraIP, alturaIP;
     C2D_TextGetDimensions(&ipText, escalaTexto, escalaTexto, &larguraIP, &alturaIP);
 
-    C2D_DrawText(&ipText, C2D_WithColor, ipX, ipY, 1.0f, escalaTexto, escalaTexto, corTexto);
+    C2D_DrawText(&ipText, C2D_WithColor, ipX - 5, ipY, 1.0f, escalaTexto, escalaTexto, corTexto);
     
     float portaX = ipX + larguraIP;
     C2D_DrawText(&simpleColon, C2D_WithColor, portaX, ipY, 1.0f, escalaTexto, escalaTexto, corTexto);
-    C2D_DrawText(&portaText, C2D_WithColor, (portaX+2.0f), ipY, 1.0f, escalaTexto, escalaTexto, corTexto);
+    C2D_DrawText(&portaText, C2D_WithColor, (portaX-3.0f), ipY, 1.0f, escalaTexto, escalaTexto, corTexto);
     
-    //
-    C2D_DrawImageAt(imagem, 40.0f, 0, 0.3f, NULL, 1.0f, 1.0f);
+    
+    //C2D_DrawImageAt(imagem, 40.0f, 0, 0.3f, NULL, 1.0f, 1.0f);
     C2D_DrawText(&statusText, C2D_AtBaseline, 100.0f, 180.0f, 1.0f, 0.6f, 0.6f);
     
 

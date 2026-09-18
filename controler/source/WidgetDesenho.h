@@ -1,3 +1,5 @@
+/*
+
 #pragma once
 #include <Widget.h>
 #include <vector>
@@ -179,3 +181,5 @@ class WidgetDesenho: public Widget
 
 
 };
+
+*/

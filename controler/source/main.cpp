@@ -1,4 +1,11 @@
-﻿#include<stdio.h>
+﻿/*
+ * Application entry point
+ * - Initializes console subsystems (GFX, RomFS, PTMU, C3D/C2D, and NetworkManager).
+ * - Orchestrates the global state machine (Scenes/Screens) and transitions between them
+ * - Manages the input capture cycle via InputHandler and the continuous sending of UDP packets
+ * - Handles handshakes, keep-alive pings, timeouts, and clean GPU/OS shutdown
+ */
+#include<stdio.h>
 #include <citro2d.h>
 #include <citro3d.h>
 #include "InputHandler.h"
@@ -31,10 +38,10 @@ int main() {
 	Result rc = romfsInit();
 	if (R_FAILED(rc)) {
 		
-		info = "Erro ao iniciar RomFS";
+		info = "RomFS initialization failed";
 	}
 	else {
-		info ="RomFS iniciado com sucesso.\n";
+		info ="...\n";
 	}                            
 
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);       
@@ -60,6 +67,8 @@ int main() {
 
 		if (nextEstate != -1) {
 			switch (nextEstate){
+				/*
+				
 				case 10: {
 					cenaConectado* cenaC = dynamic_cast<cenaConectado*>(cenaAtual);
 				if(cenaC){
@@ -69,6 +78,8 @@ int main() {
 				}
 				break;
 				}
+				
+				*/
 
 				case 11:
 				 if (transmissionPaused) {
@@ -84,7 +95,7 @@ int main() {
                 } else {
                    transmissionPaused = true;
                    if (auto cenaC = dynamic_cast<cenaConectado*>(cenaAtual)) {
-                   cenaC->setStatus("Transmissão Pausada.");
+                   cenaC->setStatus("Transmission Paused.");
                    }
                 }
                 break;
@@ -196,7 +207,7 @@ int main() {
 				transmissionPaused = true;
 
 				if (auto cenaC = dynamic_cast<cenaConectado*>(cenaAtual)) {
-                  cenaC->setStatus("PC não responde. Transmissão pausada.");
+                  cenaC->setStatus("No signal. Transmission paused.");
 				}
 
 			} else if(status == 1 && transmissionPaused){

@@ -20,6 +20,7 @@ private:
     u32 squareColor, fieldColor;
     std::vector<Botao> botoes;
     std::vector<std::vector<Botao>> paginasBotoes;
+    std::vector<conteudoBotao*> conteudos;
     int paginaAtual = 0;
     int indiceFoco = 0;
 

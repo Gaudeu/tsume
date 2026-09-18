@@ -1,3 +1,9 @@
+/*
+ * Hierarchical container structured according to the Composite pattern (derived from Widget)
+ * - Groups multiple child graphical elements with batch rendering
+ * - Manages the lifecycle and memory deallocation of its dependent elements
+ * - Provides helper utility methods for geometric drawing
+ */
 #pragma once
 #include "Widget.h"
 #include <vector>
