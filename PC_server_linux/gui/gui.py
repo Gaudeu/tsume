@@ -11,6 +11,8 @@ import threading
 
 server_process = None
 
+bullet_hex = "\u25e6"
+
 
 #funcoes
 def get_ip():
@@ -61,6 +63,11 @@ def edit_port():
 
     janela_pop.update_idletasks()  
     janela_pop.resizable(False, False)
+
+
+def helpWindow():
+    HWindow = messagebox.showinfo(title="helpful advices", message=f"{bullet_hex}Make sure the IP and port match on both the 3DS and the server. \n \n {bullet_hex} The thumbstick option switches the 3DS Circle Pad emulation between the left \n \n {bullet_hex} Ensure this server is allowed through your firewall on UDP \n \n {bullet_hex} Make sure both PC and #ds are connected on the same wifi network. \n \n {bullet_hex} Press Start on the 3DS or close the server window to end the session safely.")
+
 
 
 def toggle_view():
@@ -230,7 +237,7 @@ btn_alt.grid(column=2, row=2, pady=(15, 5), padx=2, sticky="we")
 log_box = scrolledtext.ScrolledText(frm, height=8, width=50, bg="black", fg="white", font=("Consolas", 9))
 log_box.grid(column=0, row=5, columnspan=3, pady=(15, 10), sticky="we")
 
-btn_help = ttk.Button(frm, text="Help", command=close_app)
+btn_help = ttk.Button(frm, text="Help", command=helpWindow)
 btn_help.grid(column=0, row=6, pady=(15, 5), padx=2, sticky="we")
 
 btn_quit = ttk.Button(frm, text="Quit", command=close_app)
