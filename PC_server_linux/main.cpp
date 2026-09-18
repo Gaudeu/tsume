@@ -37,8 +37,8 @@ struct InputPacket {
 #pragma pack(pop)
 
 void manipulador_sigint(int sinal) { //tambem aceita SIGTERM
-    if (sinal == SIGINT || sinal == SIGTERM && sockGlobal != -1) {
-        if(clienteConectado){
+    if (sinal == SIGINT || sinal == SIGTERM) {
+        if(clienteConectado && sockGlobal != -1){
            InputPacket avisoMorte{};
            avisoMorte.comando = 6;
            sendto(sockGlobal, &avisoMorte, sizeof(avisoMorte), 0, 
@@ -217,11 +217,19 @@ int main(int argc, char* argv[]) {
     
 
     if (sock < 0) {
-        std::cerr << "Falha ao criar socket UDP." << std::endl;
+        std::cerr << "failed to initialize socket" << std::endl;
         ioctl(uifd, UI_DEV_DESTROY);
         close(uifd);
         return -1;
     }
+
+    int opt = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    #ifdef SO_REUSEPORT
+    setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+    #endif
+
+    sockGlobal = sock;
 
     
     fcntl(sock, F_SETFL, O_NONBLOCK);

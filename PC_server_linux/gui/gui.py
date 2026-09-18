@@ -127,6 +127,10 @@ def start_server():
 
        if server_process:
            server_process.terminate()
+           try:
+               server_process.wait(timeout=1)
+           except subprocess.TimeoutExpired:
+               server_process.kill()
            server_process = None
            log_box.insert(tk.END, "\n--- PROCESS ENDED ---\n")
         
